@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff8ed">
+  <title>Feelings Check-in</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fff8ed;
+      color: #332b28;
+      font-synthesis: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(255, 209, 165, 0.48), transparent 28rem),
+        radial-gradient(circle at 92% 88%, rgba(182, 222, 208, 0.44), transparent 25rem),
+        #fff8ed;
+    }
+
+    body {
+      min-width: 280px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    button {
+      font: inherit;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible {
+      outline: 4px solid #246b64;
+      outline-offset: 4px;
+    }
+
+    .child-view {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(6px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(6px, env(safe-area-inset-left));
+    }
+
+    .panel {
+      width: min(100%, 560px);
+      text-align: center;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    .question,
+    .voice-title,
+    .thanks-title {
+      margin-bottom: clamp(24px, 7vh, 54px);
+      font-size: clamp(2rem, 9vw, 3.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+    }
+
+    .face-grid {
+      width: min(96vw, 540px);
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: min(2vw, 10px);
+    }
+
+    .face-button {
+      width: 100%;
+      min-height: clamp(108px, 34vw, 176px);
+      padding: 8px 2px;
+      border: 3px solid rgba(82, 65, 57, 0.13);
+      border-radius: clamp(24px, 8vw, 42px);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 28px rgba(91, 67, 49, 0.14);
+      cursor: pointer;
+      transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+    }
+
+    .face-button:active {
+      transform: scale(0.96);
+    }
+
+    .face-button:disabled {
+      cursor: default;
+      opacity: 0.48;
+    }
+
+    .face-button.is-selected {
+      opacity: 1;
+      box-shadow: 0 15px 34px rgba(91, 67, 49, 0.2);
+      animation: warm-bounce 420ms ease-out;
+    }
+
+    .face {
+      display: block;
+      font-size: clamp(3.7rem, 17vw, 6.5rem);
+      line-height: 1;
+      filter: saturate(0.92);
+    }
+
+    .tap-response {
+      min-height: 2.1em;
+      margin: clamp(18px, 5vh, 36px) 12px 0;
+      font-size: clamp(1.25rem, 5.4vw, 1.75rem);
+      font-weight: 700;
+      line-height: 1.25;
+      color: #3d6f66;
+      opacity: 0;
+      transition: opacity 140ms ease;
+    }
+
+    .tap-response.is-visible {
+      opacity: 1;
+    }
+
+    .voice-title {
+      margin-bottom: clamp(22px, 6vh, 44px);
+    }
+
+    .voice-actions {
+      width: min(94vw, 500px);
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(12px, 4vw, 22px);
+    }
+
+    .choice-button {
+      min-height: clamp(132px, 38vw, 184px);
+      padding: 14px 8px;
+      border: 3px solid #d5c4b6;
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #332b28;
+      box-shadow: 0 12px 28px rgba(91, 67, 49, 0.15);
+      font-size: clamp(1.15rem, 5vw, 1.5rem);
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .choice-button:active {
+      transform: scale(0.97);
+    }
+
+    .choice-button:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+
+    .choice-icon {
+      display: block;
+      margin-bottom: 9px;
+      font-size: clamp(2.7rem, 13vw, 4.7rem);
+      line-height: 1;
+    }
+
+    .listening {
+      min-height: 42px;
+      margin: clamp(20px, 6vh, 38px) 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #3d6f66;
+      font-size: 1.2rem;
+      font-weight: 700;
+      visibility: hidden;
+    }
+
+    .listening.is-visible {
+      visibility: visible;
+    }
+
+    .listening-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #5ba99b;
+      animation: calm-pulse 1.5s ease-in-out infinite;
+    }
+
+    .thanks-symbol {
+      display: block;
+      margin-bottom: 18px;
+      font-size: clamp(4rem, 20vw, 7rem);
+      line-height: 1;
+      animation: warm-bounce 420ms ease-out;
+    }
+
+    .thanks-title {
+      margin-bottom: 0;
+      color: #3d6f66;
+    }
+
+    .log-view {
+      width: min(100%, 760px);
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin-inline: auto;
+      padding:
+        max(26px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(36px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+    }
+
+    .log-title {
+      margin-bottom: 30px;
+      font-size: clamp(2rem, 8vw, 3rem);
+      letter-spacing: -0.035em;
+    }
+
+    .log-loading,
+    .log-empty {
+      padding: 38px 22px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.76);
+      color: #635650;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .day-group + .day-group {
+      margin-top: 34px;
+    }
+
+    .day-heading {
+      margin-bottom: 12px;
+      color: #635650;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .log-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      overflow: hidden;
+      border: 1px solid rgba(82, 65, 57, 0.13);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 10px 25px rgba(91, 67, 49, 0.1);
+    }
+
+    .log-entry {
+      min-height: 82px;
+      padding: 13px 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .log-entry + .log-entry {
+      border-top: 1px solid rgba(82, 65, 57, 0.12);
+    }
+
+    .log-face {
+      font-size: 2.6rem;
+      line-height: 1;
+    }
+
+    .log-time {
+      font-size: 1.08rem;
+      font-weight: 700;
+    }
+
+    .play-button {
+      min-width: 82px;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 2px solid #9bbdb6;
+      border-radius: 18px;
+      background: #eff8f5;
+      color: #315e57;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @keyframes warm-bounce {
+      0% { transform: scale(0.88); }
+      58% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes calm-pulse {
+      0%, 100% { transform: scale(0.82); opacity: 0.48; }
+      50% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="childView" class="child-view">
+    <section id="checkinPanel" class="panel" aria-labelledby="question">
+      <h1 id="question" class="question">How are you feeling?</h1>
+      <div class="face-grid">
+        <button class="face-button" type="button" data-face="happy" aria-label="Happy">
+          <span class="face" aria-hidden="true">😊</span>
+        </button>
+        <button class="face-button" type="button" data-face="neutral" aria-label="Neutral">
+          <span class="face" aria-hidden="true">😐</span>
+        </button>
+        <button class="face-button" type="button" data-face="sad" aria-label="Sad">
+          <span class="face" aria-hidden="true">😢</span>
+        </button>
+      </div>
+      <p id="tapResponse" class="tap-response" aria-live="polite"></p>
+    </section>
+
+    <section id="voicePanel" class="panel" aria-labelledby="voiceTitle" hidden>
+      <h1 id="voiceTitle" class="voice-title">Tell us why you’re sad</h1>
+      <div class="voice-actions">
+        <button id="recordButton" class="choice-button" type="button" aria-label="Record a voice clip">
+          <span class="choice-icon" aria-hidden="true">🎙️</span>
+          <span id="recordButtonText">Record</span>
+        </button>
+        <button id="noThanksButton" class="choice-button" type="button">
+          <span class="choice-icon" aria-hidden="true">💛</span>
+          No thanks
+        </button>
+      </div>
+      <div id="listeningIndicator" class="listening" role="status" aria-live="polite">
+        <span class="listening-dot" aria-hidden="true"></span>
+        <span>I’m listening</span>
+      </div>
+    </section>
+
+    <section id="thanksPanel" class="panel" aria-labelledby="thanksTitle" hidden>
+      <span class="thanks-symbol" aria-hidden="true">💛</span>
+      <h1 id="thanksTitle" class="thanks-title">Thanks for telling me!</h1>
+    </section>
+  </main>
+
+  <main id="logView" class="log-view" hidden>
+    <h1 class="log-title">Check-ins</h1>
+    <div id="logContent">
+      <p class="log-loading">Loading…</p>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const DATABASE_NAME = "feelings-checkin";
+      const DATABASE_VERSION = 1;
+      const STORE_NAME = "checkins";
+      const THANK_YOU_DURATION_MS = 2400;
+      const RECORDING_LIMIT_MS = 10000;
+      const STORAGE_TIMEOUT_MS = 2500;
+
+      const childView = document.querySelector("#childView");
+      const checkinPanel = document.querySelector("#checkinPanel");
+      const voicePanel = document.querySelector("#voicePanel");
+      const thanksPanel = document.querySelector("#thanksPanel");
+      const faceButtons = Array.from(document.querySelectorAll(".face-button"));
+      const tapResponse = document.querySelector("#tapResponse");
+      const recordButton = document.querySelector("#recordButton");
+      const recordButtonText = document.querySelector("#recordButtonText");
+      const noThanksButton = document.querySelector("#noThanksButton");
+      const listeningIndicator = document.querySelector("#listeningIndicator");
+      const logView = document.querySelector("#logView");
+      const logContent = document.querySelector("#logContent");
+
+      let databasePromise = null;
+      let faceTapLocked = false;
+      let voiceChoiceLocked = false;
+      let currentSadCheckInId = null;
+      let activeRecording = null;
+      let resetTimer = null;
+      let logRenderToken = 0;
+      let audioPlayers = [];
+
+      function logError(message, error) {
+        // Technical details belong in developer tools, never in the child's UI.
+        console.error(`[Feelings Check-in] ${message}`, error);
+      }
+
+      function wait(milliseconds) {
+        return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+      }
+
+      async function finishWithin(promise, label) {
+        // IndexedDB can remain pending if another tab blocks an upgrade. A short
+        // timeout keeps storage trouble from trapping the child on one screen.
+        let timeoutId;
+        const timeout = new Promise((resolve, reject) => {
+          timeoutId = window.setTimeout(() => {
+            reject(new Error(`${label} timed out`));
+          }, STORAGE_TIMEOUT_MS);
+        });
+
+        try {
+          return await Promise.race([promise, timeout]);
+        } finally {
+          window.clearTimeout(timeoutId);
+        }
+      }
+
+      function openDatabase() {
+        if (!("indexedDB" in window)) {
+          return Promise.reject(new Error("IndexedDB is unavailable"));
+        }
+
+        if (databasePromise) {
+          return databasePromise;
+        }
+
+        // IndexedDB uses events. This wrapper turns the open request into a
+        // promise so the rest of the app can use straightforward async/await.
+        databasePromise = new Promise((resolve, reject) => {
+          const request = window.indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+          let settled = false;
+
+          request.onupgradeneeded = () => {
+            const database = request.result;
+            if (!database.objectStoreNames.contains(STORE_NAME)) {
+              // autoIncrement supplies the required local record id. No account
+              // or device identifier is created or stored.
+              database.createObjectStore(STORE_NAME, {
+                keyPath: "id",
+                autoIncrement: true
+              });
+            }
+          };
+
+          request.onsuccess = () => {
+            if (settled) {
+              request.result.close();
+              return;
+            }
+
+            settled = true;
+            const database = request.result;
+            database.onversionchange = () => {
+              database.close();
+              databasePromise = null;
+            };
+            resolve(database);
+          };
+
+          request.onerror = () => {
+            if (settled) return;
+            settled = true;
+            reject(request.error || new Error("Could not open IndexedDB"));
+          };
+
+          request.onblocked = () => {
+            if (settled) return;
+            settled = true;
+            reject(new Error("IndexedDB open request was blocked"));
+          };
+        }).catch((error) => {
+          // A later interaction is allowed to retry after a temporary failure.
+          databasePromise = null;
+          throw error;
+        });
+
+        return databasePromise;
+      }
+
+      function addRecord(database, record) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(STORE_NAME, "readwrite");
+          const request = transaction.objectStore(STORE_NAME).add(record);
+          let newId = null;
+
+          request.onsuccess = () => {
+            newId = request.result;
+          };
+
+          transaction.oncomplete = () => resolve(newId);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not save check-in"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Check-in transaction was aborted"));
+          };
+        });
+      }
+
+      function updateRecordWithAudio(database, id, audio, audioType) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(STORE_NAME, "readwrite");
+          const store = transaction.objectStore(STORE_NAME);
+          const request = store.get(id);
+          let operationError = null;
+
+          request.onsuccess = () => {
+            const record = request.result;
+            if (!record) {
+              operationError = new Error("The sad check-in could not be found");
+              transaction.abort();
+              return;
+            }
+
+            record.audio = audio;
+            record.audioType = audioType;
+            store.put(record);
+          };
+
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => {
+            reject(operationError || transaction.error || new Error("Could not attach audio"));
+          };
+          transaction.onabort = () => {
+            reject(operationError || transaction.error || new Error("Audio transaction was aborted"));
+          };
+        });
+      }
+
+      function readAllRecords(database) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(STORE_NAME, "readonly");
+          const request = transaction.objectStore(STORE_NAME).getAll();
+          let records = [];
+
+          request.onsuccess = () => {
+            records = request.result;
+          };
+
+          transaction.oncomplete = () => resolve(records);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not read check-ins"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Read transaction was aborted"));
+          };
+        });
+      }
+
+      async function saveCheckIn(face, timestamp) {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(
+            addRecord(database, {
+              face,
+              timestamp,
+              audio: null,
+              audioType: null
+            }),
+            "Saving the check-in"
+          );
+        } catch (error) {
+          logError("The check-in could not be saved.", error);
+          return null;
+        }
+      }
+
+      async function attachAudio(id, audio, audioType) {
+        if (id === null) {
+          logError("The voice clip could not be attached because the sad check-in was not saved.", new Error("Missing check-in id"));
+          return;
+        }
+
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          await finishWithin(
+            updateRecordWithAudio(database, id, audio, audioType),
+            "Attaching the voice clip"
+          );
+        } catch (error) {
+          logError("The voice clip could not be attached.", error);
+        }
+      }
+
+      async function getCheckIns() {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(readAllRecords(database), "Reading check-ins");
+        } catch (error) {
+          logError("The check-in log could not be read.", error);
+          return [];
+        }
+      }
+
+      function primeSpeechForSadPrompt() {
+        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+          return false;
+        }
+
+        try {
+          const speech = window.speechSynthesis;
+          speech.cancel();
+          speech.resume();
+
+          // iOS Safari may reject speech first requested after an await because
+          // the original tap's temporary user activation has expired. Speaking
+          // an inaudible utterance synchronously inside the tap handler primes
+          // the engine. The real words are still spoken only after the sad
+          // check-in's IndexedDB save attempt has finished.
+          const primer = new SpeechSynthesisUtterance("ready");
+          primer.volume = 0;
+          primer.rate = 2;
+          speech.speak(primer);
+          return true;
+        } catch (error) {
+          logError("Speech synthesis could not be prepared.", error);
+          return false;
+        }
+      }
+
+      function speakSadPrompt(speechWasPrimed) {
+        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+          return;
+        }
+
+        try {
+          const speech = window.speechSynthesis;
+          const prompt = new SpeechSynthesisUtterance("Tell us why you're sad");
+          prompt.rate = 0.92;
+          prompt.pitch = 1.04;
+
+          // Cancel any unfinished silent primer. resume() also clears an iOS
+          // Safari state where speech can remain paused after an interruption.
+          if (speechWasPrimed) speech.cancel();
+          speech.resume();
+          speech.speak(prompt);
+        } catch (error) {
+          // The text remains visible, which is the required fallback.
+          logError("The sad prompt could not be spoken.", error);
+        }
+      }
+
+      function cancelSpeech() {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+      }
+
+      function showOnly(panel) {
+        checkinPanel.hidden = panel !== checkinPanel;
+        voicePanel.hidden = panel !== voicePanel;
+        thanksPanel.hidden = panel !== thanksPanel;
+      }
+
+      function showImmediateResponse(selectedButton) {
+        faceButtons.forEach((button) => {
+          button.disabled = true;
+          button.classList.toggle("is-selected", button === selectedButton);
+        });
+        tapResponse.textContent = "Thanks for telling me!";
+        tapResponse.classList.add("is-visible");
+      }
+
+      function resetRecordingControls() {
+        voiceChoiceLocked = false;
+        recordButton.disabled = false;
+        recordButton.setAttribute("aria-label", "Record a voice clip");
+        recordButtonText.textContent = "Record";
+        noThanksButton.disabled = false;
+        listeningIndicator.classList.remove("is-visible");
+      }
+
+      function showFaceScreen() {
+        window.clearTimeout(resetTimer);
+        cancelSpeech();
+        currentSadCheckInId = null;
+        faceTapLocked = false;
+        tapResponse.textContent = "";
+        tapResponse.classList.remove("is-visible");
+        faceButtons.forEach((button) => {
+          button.disabled = false;
+          button.classList.remove("is-selected");
+        });
+        resetRecordingControls();
+        showOnly(checkinPanel);
+      }
+
+      function showVoiceChoices() {
+        resetRecordingControls();
+        showOnly(voicePanel);
+      }
+
+      function showThanksThenReset() {
+        cancelSpeech();
+        showOnly(thanksPanel);
+        window.clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(showFaceScreen, THANK_YOU_DURATION_MS);
+      }
+
+      async function handleFaceTap(event) {
+        if (faceTapLocked) return;
+
+        faceTapLocked = true;
+        const selectedButton = event.currentTarget;
+        const face = selectedButton.dataset.face;
+        const timestamp = new Date().toISOString();
+        const responseStartedAt = performance.now();
+
+        // This DOM update happens synchronously, before any storage work, so the
+        // child always receives an immediate response to the tap.
+        showImmediateResponse(selectedButton);
+
+        // Prime speech during the original sad tap. The real prompt is delayed
+        // until after the save attempt below, preserving the required ordering.
+        const speechWasPrimed = face === "sad" ? primeSpeechForSadPrompt() : false;
+        const checkInId = await saveCheckIn(face, timestamp);
+
+        if (face === "sad") {
+          currentSadCheckInId = checkInId;
+          showVoiceChoices();
+          speakSadPrompt(speechWasPrimed);
+          return;
+        }
+
+        const elapsed = performance.now() - responseStartedAt;
+        await wait(Math.max(0, THANK_YOU_DURATION_MS - elapsed));
+        showFaceScreen();
+      }
+
+      function preferredAudioType() {
+        // Safari on iOS normally selects MP4. Other candidates keep local
+        // desktop testing useful without assuming every browser records WebM.
+        const candidates = [
+          "audio/mp4",
+          "audio/mp4;codecs=mp4a.40.2",
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/ogg;codecs=opus"
+        ];
+
+        return candidates.find((type) => window.MediaRecorder.isTypeSupported(type)) || "";
+      }
+
+      function releaseMicrophone(stream) {
+        if (!stream) return;
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
+      function createRecorder(stream, audioType) {
+        if (!audioType) return new MediaRecorder(stream);
+
+        try {
+          return new MediaRecorder(stream, { mimeType: audioType });
+        } catch (error) {
+          // A browser can occasionally claim support but reject the explicit
+          // option. Its default is safer than losing the recording completely.
+          logError("The preferred audio type could not be used; using the browser default.", error);
+          return new MediaRecorder(stream);
+        }
+      }
+
+      async function completeRecording(session, shouldAttachAudio) {
+        if (session.finalized) return;
+        session.finalized = true;
+        window.clearTimeout(session.stopTimer);
+        releaseMicrophone(session.stream);
+        activeRecording = null;
+        listeningIndicator.classList.remove("is-visible");
+
+        if (shouldAttachAudio && session.chunks.length > 0) {
+          const audioType = session.recorder.mimeType || session.audioType || session.chunks[0].type || "";
+          const audio = new Blob(session.chunks, audioType ? { type: audioType } : undefined);
+
+          if (audio.size > 0) {
+            await attachAudio(currentSadCheckInId, audio, audioType || null);
+          } else {
+            logError("The recorded voice clip was empty.", new Error("Empty audio Blob"));
+          }
+        } else if (shouldAttachAudio) {
+          logError("The recorder returned no audio data.", new Error("No MediaRecorder chunks"));
+        }
+
+        showThanksThenReset();
+      }
+
+      function requestRecordingStop() {
+        const session = activeRecording;
+        if (!session || session.finalized) return;
+
+        window.clearTimeout(session.stopTimer);
+        recordButton.disabled = true;
+        listeningIndicator.classList.remove("is-visible");
+
+        try {
+          if (session.recorder.state !== "inactive") {
+            session.recorder.stop();
+            // Stop every track immediately after requesting the final chunk so
+            // iOS releases the orange microphone indicator without delay.
+            releaseMicrophone(session.stream);
+          } else {
+            void completeRecording(session, true);
+          }
+        } catch (error) {
+          logError("Recording could not be stopped normally.", error);
+          releaseMicrophone(session.stream);
+          void completeRecording(session, false);
+        }
+      }
+
+      async function startRecording() {
+        if (voiceChoiceLocked) return;
+        voiceChoiceLocked = true;
+        recordButton.disabled = true;
+        noThanksButton.disabled = true;
+        cancelSpeech();
+
+        let stream = null;
+        try {
+          if (!("mediaDevices" in navigator) || !("getUserMedia" in navigator.mediaDevices)) {
+            throw new Error("Microphone access is unavailable");
+          }
+          if (!("MediaRecorder" in window)) {
+            throw new Error("MediaRecorder is unavailable");
+          }
+
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const audioType = preferredAudioType();
+          const recorder = createRecorder(stream, audioType);
+          const session = {
+            recorder,
+            stream,
+            audioType,
+            chunks: [],
+            stopTimer: null,
+            finalized: false
+          };
+
+          activeRecording = session;
+
+          recorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+              session.chunks.push(event.data);
+            }
+          };
+
+          recorder.onstop = () => {
+            void completeRecording(session, true);
+          };
+
+          recorder.onerror = (event) => {
+            logError("MediaRecorder reported an error.", event.error || event);
+            releaseMicrophone(session.stream);
+            void completeRecording(session, false);
+          };
+
+          recorder.start();
+          recordButton.disabled = false;
+          recordButton.setAttribute("aria-label", "Stop recording");
+          recordButtonText.textContent = "Stop";
+          listeningIndicator.classList.add("is-visible");
+
+          // The ten-second limit is intentionally invisible. It limits stored
+          // audio without giving the child a countdown or time pressure.
+          session.stopTimer = window.setTimeout(requestRecordingStop, RECORDING_LIMIT_MS);
+        } catch (error) {
+          releaseMicrophone(stream);
+          logError("Microphone permission was denied or recording could not start.", error);
+          showThanksThenReset();
+        }
+      }
+
+      function handleRecordButton() {
+        if (activeRecording && activeRecording.recorder.state === "recording") {
+          requestRecordingStop();
+          return;
+        }
+        void startRecording();
+      }
+
+      function handleNoThanks() {
+        if (voiceChoiceLocked) return;
+        voiceChoiceLocked = true;
+        recordButton.disabled = true;
+        noThanksButton.disabled = true;
+        showThanksThenReset();
+      }
+
+      function localDayKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function cleanUpAudioPlayers() {
+        audioPlayers.forEach(({ audio, url }) => {
+          audio.pause();
+          URL.revokeObjectURL(url);
+        });
+        audioPlayers = [];
+      }
+
+      function makePlayButton(record) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "play-button";
+        button.textContent = "▶ Play";
+        button.setAttribute("aria-label", "Play voice clip");
+
+        const url = URL.createObjectURL(record.audio);
+        const audio = new Audio(url);
+        audio.preload = "metadata";
+        const player = { audio, url, button };
+        audioPlayers.push(player);
+
+        function resetButton() {
+          button.textContent = "▶ Play";
+          button.setAttribute("aria-label", "Play voice clip");
+        }
+
+        audio.addEventListener("ended", resetButton);
+        audio.addEventListener("pause", resetButton);
+
+        button.addEventListener("click", async () => {
+          if (!audio.paused) {
+            audio.pause();
+            audio.currentTime = 0;
+            return;
+          }
+
+          audioPlayers.forEach((otherPlayer) => {
+            if (otherPlayer !== player) {
+              otherPlayer.audio.pause();
+              otherPlayer.audio.currentTime = 0;
+            }
+          });
+
+          try {
+            await audio.play();
+            button.textContent = "■ Stop";
+            button.setAttribute("aria-label", "Stop voice clip");
+          } catch (error) {
+            logError("The voice clip could not be played.", error);
+            resetButton();
+          }
+        });
+
+        return button;
+      }
+
+      function renderRecords(records) {
+        logContent.replaceChildren();
+
+        if (records.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "log-empty";
+          empty.textContent = "No check-ins yet.";
+          logContent.append(empty);
+          return;
+        }
+
+        const faceDetails = {
+          happy: { symbol: "😊", label: "Happy" },
+          neutral: { symbol: "😐", label: "Neutral" },
+          sad: { symbol: "😢", label: "Sad" }
+        };
+        const groups = new Map();
+
+        records
+          .slice()
+          .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
+          .forEach((record) => {
+            const date = new Date(record.timestamp);
+            const key = localDayKey(date);
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push({ record, date });
+          });
+
+        groups.forEach((entries) => {
+          const section = document.createElement("section");
+          section.className = "day-group";
+
+          const heading = document.createElement("h2");
+          heading.className = "day-heading";
+          heading.textContent = new Intl.DateTimeFormat(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          }).format(entries[0].date);
+
+          const list = document.createElement("ul");
+          list.className = "log-list";
+
+          entries.forEach(({ record, date }) => {
+            const details = faceDetails[record.face] || { symbol: "•", label: "Check-in" };
+            const item = document.createElement("li");
+            item.className = "log-entry";
+
+            const face = document.createElement("span");
+            face.className = "log-face";
+            face.setAttribute("role", "img");
+            face.setAttribute("aria-label", details.label);
+            face.textContent = details.symbol;
+
+            const time = document.createElement("time");
+            time.className = "log-time";
+            time.dateTime = record.timestamp;
+            time.textContent = new Intl.DateTimeFormat(undefined, {
+              hour: "numeric",
+              minute: "2-digit"
+            }).format(date);
+
+            item.append(face, time);
+            if (record.audio instanceof Blob && record.audio.size > 0) {
+              item.append(makePlayButton(record));
+            }
+            list.append(item);
+          });
+
+          section.append(heading, list);
+          logContent.append(section);
+        });
+      }
+
+      async function renderLog() {
+        const token = ++logRenderToken;
+        cleanUpAudioPlayers();
+
+        const loading = document.createElement("p");
+        loading.className = "log-loading";
+        loading.textContent = "Loading…";
+        logContent.replaceChildren(loading);
+
+        const records = await getCheckIns();
+        if (token !== logRenderToken || window.location.hash !== "#log") return;
+        renderRecords(records);
+      }
+
+      function renderRoute() {
+        const showLog = window.location.hash === "#log";
+        childView.hidden = showLog;
+        logView.hidden = !showLog;
+
+        if (showLog) {
+          cancelSpeech();
+          void renderLog();
+        } else {
+          ++logRenderToken;
+          cleanUpAudioPlayers();
+        }
+      }
+
+      faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
+      recordButton.addEventListener("click", handleRecordButton);
+      noThanksButton.addEventListener("click", handleNoThanks);
+      window.addEventListener("hashchange", renderRoute);
+      window.addEventListener("pagehide", () => {
+        cancelSpeech();
+        cleanUpAudioPlayers();
+        if (activeRecording) {
+          releaseMicrophone(activeRecording.stream);
+        }
+      });
+
+      showFaceScreen();
+      renderRoute();
+    })();
+  </script>
+</body>
+</html>
