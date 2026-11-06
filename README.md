@@ -31,6 +31,10 @@ photo library. The app center-crops the photo, resizes it, removes its camera
 metadata, and saves the result only in this browser. **Use emoji** removes that
 custom photo and restores the original face.
 
+The child buttons and parent log both use the currently configured photo for
+each feeling. Replacing a photo updates how earlier log entries are displayed;
+it does not change their stored feeling, timestamp, or recording.
+
 The setup page is intentionally not linked from the child screen. Configure the
 photos using the same Safari browser and exact site address that the Shortcut
 will open; browser storage is separate for every site address.

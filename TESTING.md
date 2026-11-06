@@ -24,8 +24,10 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
       changes on the child screen.
 - [ ] Tap **Use emoji** for one feeling and confirm only that face returns to
       its original emoji.
-- [ ] Confirm existing entries and recordings in `#log` were not changed by
-      replacing or resetting photos.
+- [ ] Open `#log` and confirm every entry uses the current photo for its
+      feeling, while a reset feeling uses its emoji.
+- [ ] Replace or reset a photo and confirm existing entries update visually
+      without changing their timestamps or recordings.
 
 ## Child screen
 
@@ -77,7 +79,8 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 ## Parent log and persistence
 
 - [ ] Open the same site with `#log` appended to its URL.
-- [ ] Entries are newest first and show a face and local time.
+- [ ] Entries are newest first and show the configured face photo (or fallback
+      emoji) and local time.
 - [ ] Entries from different calendar days are grouped under day headings.
 - [ ] Only entries with recordings show a Play button.
 - [ ] The log has no delete, export, chart, summary, score, count, or streak.
