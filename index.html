@@ -553,7 +553,7 @@
         <div>
           <h2 id="happySetupTitle" class="setup-card-title">Happy</h2>
           <div class="setup-actions">
-            <input id="happyPhotoInput" class="file-input" type="file" accept="image/*" data-face-image-input="happy">
+            <input id="happyPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="happy">
             <label class="photo-picker" for="happyPhotoInput">Take or choose photo</label>
             <button class="default-button" type="button" data-reset-face="happy" disabled>Use emoji</button>
           </div>
@@ -568,7 +568,7 @@
         <div>
           <h2 id="neutralSetupTitle" class="setup-card-title">Neutral</h2>
           <div class="setup-actions">
-            <input id="neutralPhotoInput" class="file-input" type="file" accept="image/*" data-face-image-input="neutral">
+            <input id="neutralPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="neutral">
             <label class="photo-picker" for="neutralPhotoInput">Take or choose photo</label>
             <button class="default-button" type="button" data-reset-face="neutral" disabled>Use emoji</button>
           </div>
@@ -583,7 +583,7 @@
         <div>
           <h2 id="sadSetupTitle" class="setup-card-title">Sad</h2>
           <div class="setup-actions">
-            <input id="sadPhotoInput" class="file-input" type="file" accept="image/*" data-face-image-input="sad">
+            <input id="sadPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="sad">
             <label class="photo-picker" for="sadPhotoInput">Take or choose photo</label>
             <button class="default-button" type="button" data-reset-face="sad" disabled>Use emoji</button>
           </div>
@@ -605,6 +605,7 @@
       const THANK_YOU_DURATION_MS = 2400;
       const RECORDING_LIMIT_MS = 10000;
       const STORAGE_TIMEOUT_MS = 2500;
+      const PHOTO_STORAGE_TIMEOUT_MS = 15000;
       const FACE_LABELS = {
         happy: "Happy",
         neutral: "Neutral",
@@ -637,6 +638,8 @@
       let logRenderToken = 0;
       let audioPlayers = [];
       let faceImagesReady = null;
+      let lastFaceImageSaveError = null;
+      let databaseUpgradeBlocked = false;
       const faceImageUrls = new Map();
       const faceImageVersionIds = new Map();
       const logFaceImageUrls = new Map();
@@ -650,14 +653,20 @@
         return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
       }
 
-      async function finishWithin(promise, label) {
+      function makeDatabaseBlockedError() {
+        const error = new Error("IndexedDB open request was blocked by another tab");
+        error.code = "database-blocked";
+        return error;
+      }
+
+      async function finishWithin(promise, label, timeoutMilliseconds = STORAGE_TIMEOUT_MS) {
         // IndexedDB can remain pending if another tab blocks an upgrade. A short
         // timeout keeps storage trouble from trapping the child on one screen.
         let timeoutId;
         const timeout = new Promise((resolve, reject) => {
           timeoutId = window.setTimeout(() => {
             reject(new Error(`${label} timed out`));
-          }, STORAGE_TIMEOUT_MS);
+          }, timeoutMilliseconds);
         });
 
         try {
@@ -740,6 +749,7 @@
           };
 
           request.onsuccess = () => {
+            databaseUpgradeBlocked = false;
             if (settled) {
               request.result.close();
               return;
@@ -762,8 +772,9 @@
 
           request.onblocked = () => {
             if (settled) return;
+            databaseUpgradeBlocked = true;
             settled = true;
-            reject(new Error("IndexedDB open request was blocked"));
+            reject(makeDatabaseBlockedError());
           };
         }).catch((error) => {
           // A later interaction is allowed to retry after a temporary failure.
@@ -973,16 +984,44 @@
       }
 
       async function saveFaceImage(face, image) {
+        lastFaceImageSaveError = null;
+        if (databaseUpgradeBlocked) {
+          lastFaceImageSaveError = makeDatabaseBlockedError();
+          logError("The face photo could not be saved.", lastFaceImageSaveError);
+          return null;
+        }
+
         try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
+          // Parent setup can wait longer than the child's one-tap flow. iOS may
+          // need several seconds to finish a database upgrade or write a photo.
+          const database = await finishWithin(
+            openDatabase(),
+            "Opening storage",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
           return await finishWithin(
             putFaceImageRecord(database, face, image),
-            "Saving the face photo"
+            "Saving the face photo",
+            PHOTO_STORAGE_TIMEOUT_MS
           );
         } catch (error) {
+          lastFaceImageSaveError = error;
           logError("The face photo could not be saved.", error);
           return null;
         }
+      }
+
+      function faceImageSaveMessage(error) {
+        if (
+          databaseUpgradeBlocked ||
+          (error && (error.code === "database-blocked" || error.message.includes("blocked")))
+        ) {
+          return "Close other Feelings Check-in tabs, reload this page, and try again.";
+        }
+        if (error && error.name === "QuotaExceededError") {
+          return "Safari does not have enough local storage for that photo.";
+        }
+        return "That photo couldn’t be saved. Reload this page and try again.";
       }
 
       async function removeFaceImage(face) {
@@ -1073,7 +1112,9 @@
       }
 
       async function prepareFaceImage(file) {
-        if (!file.type.startsWith("image/")) {
+        // Some iOS camera and Photos picker results omit the MIME type. Let the
+        // browser attempt to decode those files instead of rejecting them early.
+        if (file.type && !file.type.startsWith("image/")) {
           throw new Error("The selected file is not an image");
         }
 
@@ -1081,11 +1122,15 @@
         try {
           const sourceImage = new Image();
           sourceImage.decoding = "async";
-          await new Promise((resolve, reject) => {
-            sourceImage.onload = resolve;
-            sourceImage.onerror = () => reject(new Error("The selected image could not be opened"));
-            sourceImage.src = sourceUrl;
-          });
+          await finishWithin(
+            new Promise((resolve, reject) => {
+              sourceImage.onload = resolve;
+              sourceImage.onerror = () => reject(new Error("The selected image could not be opened"));
+              sourceImage.src = sourceUrl;
+            }),
+            "Opening the selected photo",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
 
           if (!sourceImage.naturalWidth || !sourceImage.naturalHeight) {
             throw new Error("The selected image has no usable dimensions");
@@ -1118,12 +1163,16 @@
             outputSize
           );
 
-          return await new Promise((resolve, reject) => {
-            canvas.toBlob((blob) => {
-              if (blob) resolve(blob);
-              else reject(new Error("The resized image could not be created"));
-            }, "image/jpeg", 0.86);
-          });
+          return await finishWithin(
+            new Promise((resolve, reject) => {
+              canvas.toBlob((blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error("The resized image could not be created"));
+              }, "image/jpeg", 0.86);
+            }),
+            "Preparing the selected photo",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
         } finally {
           URL.revokeObjectURL(sourceUrl);
         }
@@ -1142,9 +1191,10 @@
         try {
           await faceImagesReady;
           const image = await prepareFaceImage(file);
+          faceSetupStatus.textContent = `Saving ${FACE_LABELS[face].toLowerCase()} photo…`;
           const versionId = await saveFaceImage(face, image);
           if (versionId === null) {
-            faceSetupStatus.textContent = "That photo couldn’t be saved. Please try another.";
+            faceSetupStatus.textContent = faceImageSaveMessage(lastFaceImageSaveError);
             return;
           }
 

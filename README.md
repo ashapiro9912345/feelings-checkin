@@ -31,6 +31,12 @@ photo library. The app center-crops the photo, resizes it, removes its camera
 metadata, and saves the result only in this browser. **Use emoji** removes that
 custom photo and restores the original face.
 
+After choosing a photo, the setup page reports that it is preparing, saving,
+and finally saved on the device. If Safari says to close other Feelings Check-in
+tabs, close those tabs and reload `#faces`; an older open tab can temporarily
+block the local database upgrade. The picker requests JPEG or PNG so iOS can
+convert camera formats before the app crops them.
+
 Each new check-in remembers the exact photo version active when it was tapped.
 Replacing or resetting a photo changes the child button but does not rewrite
 photos on later or earlier log entries. Check-ins created before photo versioning
@@ -113,6 +119,10 @@ manually add `#log` to the end of the same GitHub Pages URL in Safari.
   that moment, so the log preserves its historical image without duplicating the
   Blob in every check-in. Camera-sized images are center-cropped and reduced to
   at most 720 by 720 pixels before storage.
+- **Database upgrades:** An older Feelings Check-in tab can temporarily block an
+  IndexedDB version upgrade in Safari. The parent setup page reports this case
+  with instructions to close the other tabs and reload; the child screen still
+  never shows a technical error.
 - **Speech on iOS:** Safari can require speech synthesis to begin from a user
   gesture. The sad tap primes the speech engine silently; the audible prompt
   is spoken only after the sad check-in save attempt finishes. If speech is

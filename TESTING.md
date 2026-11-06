@@ -14,7 +14,8 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 
 - [ ] Open the same site with `#faces` appended to its URL.
 - [ ] For Happy, tap **Take or choose photo**, take a new picture, and confirm
-      the preview changes from the emoji to the photo.
+      the status progresses from preparing to saving to saved, then confirm the
+      preview changes from the emoji to the photo.
 - [ ] Choose separate pictures for Neutral and Sad and confirm all three
       previews remain distinct.
 - [ ] Return to the child URL without `#faces`. Confirm the three large buttons
@@ -30,6 +31,8 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
       retain their respective photos.
 - [ ] Confirm replacing or resetting photos does not change existing timestamps
       or recordings.
+- [ ] If setup reports that the database is blocked, close every other Feelings
+      Check-in Safari tab, reload `#faces`, and confirm the photo then saves.
 
 ## Child screen
 
