@@ -20,14 +20,16 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 - [ ] Return to the child URL without `#faces`. Confirm the three large buttons
       show the custom photos and still fit without horizontal scrolling.
 - [ ] Reload Safari, then close and reopen it. Confirm all three photos persist.
-- [ ] Return to `#faces`, replace one photo, and confirm only that feeling
-      changes on the child screen.
-- [ ] Tap **Use emoji** for one feeling and confirm only that face returns to
-      its original emoji.
-- [ ] Open `#log` and confirm every entry uses the current photo for its
-      feeling, while a reset feeling uses its emoji.
-- [ ] Replace or reset a photo and confirm existing entries update visually
-      without changing their timestamps or recordings.
+- [ ] With the first Happy photo configured, make a Happy check-in.
+- [ ] Return to `#faces`, replace the Happy photo, then make a second Happy
+      check-in.
+- [ ] Open `#log`. Confirm the newer Happy entry uses the second photo and the
+      older Happy entry still uses the first photo.
+- [ ] Return to `#faces`, tap **Use emoji** for Happy, and make a third Happy
+      check-in. Confirm its log entry uses the emoji while the two older entries
+      retain their respective photos.
+- [ ] Confirm replacing or resetting photos does not change existing timestamps
+      or recordings.
 
 ## Child screen
 
@@ -79,8 +81,8 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 ## Parent log and persistence
 
 - [ ] Open the same site with `#log` appended to its URL.
-- [ ] Entries are newest first and show the configured face photo (or fallback
-      emoji) and local time.
+- [ ] Entries are newest first and show the face photo (or emoji) that was active
+      when each check-in was made, plus the local time.
 - [ ] Entries from different calendar days are grouped under day headings.
 - [ ] Only entries with recordings show a Play button.
 - [ ] The log has no delete, export, chart, summary, score, count, or streak.

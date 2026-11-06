@@ -598,9 +598,10 @@
       "use strict";
 
       const DATABASE_NAME = "feelings-checkin";
-      const DATABASE_VERSION = 2;
+      const DATABASE_VERSION = 3;
       const CHECKINS_STORE_NAME = "checkins";
       const FACE_IMAGES_STORE_NAME = "faceImages";
+      const FACE_IMAGE_VERSIONS_STORE_NAME = "faceImageVersions";
       const THANK_YOU_DURATION_MS = 2400;
       const RECORDING_LIMIT_MS = 10000;
       const STORAGE_TIMEOUT_MS = 2500;
@@ -637,6 +638,8 @@
       let audioPlayers = [];
       let faceImagesReady = null;
       const faceImageUrls = new Map();
+      const faceImageVersionIds = new Map();
+      const logFaceImageUrls = new Map();
 
       function logError(message, error) {
         // Technical details belong in developer tools, never in the child's UI.
@@ -697,6 +700,42 @@
               database.createObjectStore(FACE_IMAGES_STORE_NAME, {
                 keyPath: "face"
               });
+            }
+
+            if (!database.objectStoreNames.contains(FACE_IMAGE_VERSIONS_STORE_NAME)) {
+              // Each saved photo version gets its own local id. A check-in can
+              // reference that id without copying the same Blob into every row.
+              const versionStore = database.createObjectStore(FACE_IMAGE_VERSIONS_STORE_NAME, {
+                keyPath: "id",
+                autoIncrement: true
+              });
+              const currentStore = request.transaction.objectStore(FACE_IMAGES_STORE_NAME);
+              const cursorRequest = currentStore.openCursor();
+
+              // Version 2 stored only the current photo. Preserve that photo as
+              // the first version so future check-ins can snapshot it without
+              // asking the parent to upload it again.
+              cursorRequest.onsuccess = () => {
+                const cursor = cursorRequest.result;
+                if (!cursor) return;
+
+                const record = cursor.value;
+                if (record.image instanceof Blob && record.versionId === undefined) {
+                  const versionRequest = versionStore.add({
+                    face: record.face,
+                    image: record.image,
+                    createdAt: record.updatedAt || new Date().toISOString()
+                  });
+                  versionRequest.onsuccess = () => {
+                    record.versionId = versionRequest.result;
+                    const updateRequest = cursor.update(record);
+                    updateRequest.onsuccess = () => cursor.continue();
+                  };
+                  return;
+                }
+
+                cursor.continue();
+              };
             }
           };
 
@@ -807,19 +846,29 @@
 
       function putFaceImageRecord(database, face, image) {
         return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readwrite");
-          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).put({
-            face,
-            image,
-            updatedAt: new Date().toISOString()
-          });
+          const transaction = database.transaction(
+            [FACE_IMAGES_STORE_NAME, FACE_IMAGE_VERSIONS_STORE_NAME],
+            "readwrite"
+          );
+          const currentStore = transaction.objectStore(FACE_IMAGES_STORE_NAME);
+          const versionStore = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME);
+          const updatedAt = new Date().toISOString();
+          const versionRequest = versionStore.add({ face, image, createdAt: updatedAt });
+          let versionId = null;
 
-          transaction.oncomplete = () => resolve();
+          versionRequest.onsuccess = () => {
+            versionId = versionRequest.result;
+            currentStore.put({ face, image, updatedAt, versionId });
+          };
+
+          // Both writes share one transaction: a photo cannot become current
+          // unless its immutable history version was also saved successfully.
+          transaction.oncomplete = () => resolve(versionId);
           transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not save the face photo"));
+            reject(transaction.error || versionRequest.error || new Error("Could not save the face photo"));
           };
           transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo transaction was aborted"));
+            reject(transaction.error || versionRequest.error || new Error("Face photo transaction was aborted"));
           };
         });
       }
@@ -858,7 +907,26 @@
         });
       }
 
-      async function saveCheckIn(face, timestamp) {
+      function readAllFaceImageVersions(database) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGE_VERSIONS_STORE_NAME, "readonly");
+          const request = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME).getAll();
+          let records = [];
+
+          request.onsuccess = () => {
+            records = request.result;
+          };
+          transaction.oncomplete = () => resolve(records);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not read face photo history"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo history read was aborted"));
+          };
+        });
+      }
+
+      async function saveCheckIn(face, timestamp, faceImageVersionId) {
         try {
           const database = await finishWithin(openDatabase(), "Opening storage");
           return await finishWithin(
@@ -866,7 +934,8 @@
               face,
               timestamp,
               audio: null,
-              audioType: null
+              audioType: null,
+              faceImageVersionId
             }),
             "Saving the check-in"
           );
@@ -906,14 +975,13 @@
       async function saveFaceImage(face, image) {
         try {
           const database = await finishWithin(openDatabase(), "Opening storage");
-          await finishWithin(
+          return await finishWithin(
             putFaceImageRecord(database, face, image),
             "Saving the face photo"
           );
-          return true;
         } catch (error) {
           logError("The face photo could not be saved.", error);
-          return false;
+          return null;
         }
       }
 
@@ -941,7 +1009,20 @@
         }
       }
 
-      function displayFaceImage(face, image) {
+      async function getFaceImageVersions() {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(
+            readAllFaceImageVersions(database),
+            "Reading face photo history"
+          );
+        } catch (error) {
+          logError("The face photo history could not be read.", error);
+          return [];
+        }
+      }
+
+      function displayFaceImage(face, image, versionId = null) {
         const oldUrl = faceImageUrls.get(face);
         const photoElements = document.querySelectorAll(`[data-face-photo="${face}"]`);
         const fallbackElements = document.querySelectorAll(`[data-face-fallback="${face}"]`);
@@ -955,12 +1036,16 @@
           URL.revokeObjectURL(oldUrl);
           faceImageUrls.delete(face);
         }
+        faceImageVersionIds.delete(face);
 
         if (image instanceof Blob && image.size > 0) {
           // One object URL can feed both the child button and setup preview.
           // It points at the local Blob; it does not make a network request.
           const url = URL.createObjectURL(image);
           faceImageUrls.set(face, url);
+          if (versionId !== null && versionId !== undefined) {
+            faceImageVersionIds.set(face, versionId);
+          }
           photoElements.forEach((element) => {
             element.src = url;
             element.hidden = false;
@@ -982,7 +1067,7 @@
         const records = await getFaceImages();
         records.forEach((record) => {
           if (FACE_LABELS[record.face] && record.image instanceof Blob) {
-            displayFaceImage(record.face, record.image);
+            displayFaceImage(record.face, record.image, record.versionId);
           }
         });
       }
@@ -1057,13 +1142,13 @@
         try {
           await faceImagesReady;
           const image = await prepareFaceImage(file);
-          const wasSaved = await saveFaceImage(face, image);
-          if (!wasSaved) {
+          const versionId = await saveFaceImage(face, image);
+          if (versionId === null) {
             faceSetupStatus.textContent = "That photo couldn’t be saved. Please try another.";
             return;
           }
 
-          displayFaceImage(face, image);
+          displayFaceImage(face, image, versionId);
           faceSetupStatus.textContent = `${FACE_LABELS[face]} photo saved on this device.`;
         } catch (error) {
           logError("The selected face photo could not be prepared.", error);
@@ -1213,7 +1298,13 @@
         // Prime speech during the original sad tap. The real prompt is delayed
         // until after the save attempt below, preserving the required ordering.
         const speechWasPrimed = face === "sad" ? primeSpeechForSadPrompt() : false;
-        const checkInId = await saveCheckIn(face, timestamp);
+
+        // Loading is normally complete before a tap. Awaiting it here handles a
+        // very fast first tap while keeping the visual response above instant.
+        // The saved version id freezes the exact photo used for this check-in.
+        await faceImagesReady;
+        const faceImageVersionId = faceImageVersionIds.get(face) || null;
+        const checkInId = await saveCheckIn(face, timestamp, faceImageVersionId);
 
         if (face === "sad") {
           currentSadCheckInId = checkInId;
@@ -1400,6 +1491,39 @@
         audioPlayers = [];
       }
 
+      function cleanUpLogFaceImages() {
+        logFaceImageUrls.forEach((url) => URL.revokeObjectURL(url));
+        logFaceImageUrls.clear();
+      }
+
+      function getLogFaceImageUrl(record, versionsById) {
+        const hasSavedPhotoVersion = Object.prototype.hasOwnProperty.call(
+          record,
+          "faceImageVersionId"
+        );
+
+        if (hasSavedPhotoVersion) {
+          // null means the emoji was active at check-in time. If a referenced
+          // Blob is missing, the honest fallback is also the emoji—not a newer
+          // photo that would rewrite history.
+          if (record.faceImageVersionId === null) return null;
+          const version = versionsById.get(record.faceImageVersionId);
+          if (!version || !(version.image instanceof Blob) || version.image.size === 0) {
+            return null;
+          }
+
+          if (!logFaceImageUrls.has(version.id)) {
+            logFaceImageUrls.set(version.id, URL.createObjectURL(version.image));
+          }
+          return logFaceImageUrls.get(version.id);
+        }
+
+        // Records saved before photo versioning contain no historical link.
+        // Continue showing the current photo for those legacy rows because the
+        // exact photo active at their check-in time cannot be reconstructed.
+        return faceImageUrls.get(record.face) || null;
+      }
+
       function makePlayButton(record) {
         const button = document.createElement("button");
         button.type = "button";
@@ -1448,7 +1572,7 @@
         return button;
       }
 
-      function renderRecords(records) {
+      function renderRecords(records, faceImageVersions) {
         logContent.replaceChildren();
 
         if (records.length === 0) {
@@ -1464,6 +1588,9 @@
           neutral: { symbol: "😐", label: "Neutral" },
           sad: { symbol: "😢", label: "Sad" }
         };
+        const versionsById = new Map(
+          faceImageVersions.map((version) => [version.id, version])
+        );
         const groups = new Map();
 
         records
@@ -1498,11 +1625,8 @@
             item.className = "log-entry";
 
             let face;
-            const faceImageUrl = faceImageUrls.get(record.face);
+            const faceImageUrl = getLogFaceImageUrl(record, versionsById);
             if (faceImageUrl) {
-              // Check-ins store the feeling, not a duplicate photo. The log
-              // therefore shows the current photo configured for that feeling,
-              // while changing a photo leaves the raw history untouched.
               face = document.createElement("img");
               face.className = "log-face-photo";
               face.src = faceImageUrl;
@@ -1538,17 +1662,22 @@
       async function renderLog() {
         const token = ++logRenderToken;
         cleanUpAudioPlayers();
+        cleanUpLogFaceImages();
 
         const loading = document.createElement("p");
         loading.className = "log-loading";
         loading.textContent = "Loading…";
         logContent.replaceChildren(loading);
 
-        // Face photos and check-ins live in separate stores. Waiting for both
-        // prevents the log from briefly rendering emoji before photos arrive.
-        const [records] = await Promise.all([getCheckIns(), faceImagesReady]);
+        // Face photos, their immutable versions, and check-ins live in separate
+        // stores. Wait for all three before deciding which image belongs in a row.
+        const [records, , faceImageVersions] = await Promise.all([
+          getCheckIns(),
+          faceImagesReady,
+          getFaceImageVersions()
+        ]);
         if (token !== logRenderToken || window.location.hash !== "#log") return;
-        renderRecords(records);
+        renderRecords(records, faceImageVersions);
       }
 
       function renderRoute() {
@@ -1564,6 +1693,7 @@
         } else {
           ++logRenderToken;
           cleanUpAudioPlayers();
+          cleanUpLogFaceImages();
           if (showFaceSetup) cancelSpeech();
         }
       }
@@ -1577,6 +1707,7 @@
       window.addEventListener("pagehide", () => {
         cancelSpeech();
         cleanUpAudioPlayers();
+        cleanUpLogFaceImages();
         if (activeRecording) {
           releaseMicrophone(activeRecording.stream);
         }

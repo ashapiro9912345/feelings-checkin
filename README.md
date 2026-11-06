@@ -31,9 +31,11 @@ photo library. The app center-crops the photo, resizes it, removes its camera
 metadata, and saves the result only in this browser. **Use emoji** removes that
 custom photo and restores the original face.
 
-The child buttons and parent log both use the currently configured photo for
-each feeling. Replacing a photo updates how earlier log entries are displayed;
-it does not change their stored feeling, timestamp, or recording.
+Each new check-in remembers the exact photo version active when it was tapped.
+Replacing or resetting a photo changes the child button but does not rewrite
+photos on later or earlier log entries. Check-ins created before photo versioning
+cannot be reconstructed; those legacy rows continue using the current photo as
+a fallback.
 
 The setup page is intentionally not linked from the child screen. Configure the
 photos using the same Safari browser and exact site address that the Shortcut
@@ -106,10 +108,11 @@ manually add `#log` to the end of the same GitHub Pages URL in Safari.
 - **IndexedDB:** The app wraps IndexedDB's event-based operations in promises
   so each save can be awaited. If storage is unavailable, details go only to
   the console and the child still receives the normal warm response.
-- **Face photos:** Check-ins and custom photos use separate IndexedDB object
-  stores, so replacing a photo never changes the check-in history. Camera-sized
-  images are center-cropped and reduced to at most 720 by 720 pixels before
-  storage.
+- **Face photos:** IndexedDB keeps the current photo and immutable photo versions
+  separately. Each new check-in stores the local version id that was active at
+  that moment, so the log preserves its historical image without duplicating the
+  Blob in every check-in. Camera-sized images are center-cropped and reduced to
+  at most 720 by 720 pixels before storage.
 - **Speech on iOS:** Safari can require speech synthesis to begin from a user
   gesture. The sad tap primes the speech engine silently; the audible prompt
   is spoken only after the sad check-in save attempt finishes. If speech is
