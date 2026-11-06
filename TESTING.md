@@ -6,13 +6,31 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 ## Before testing
 
 - [ ] Use normal Safari, not a Home Screen web app or Private Browsing.
-- [ ] Confirm the child URL does not end in `#log`.
+- [ ] Confirm the child URL does not end in `#log` or `#faces`.
 - [ ] Keep the phone in portrait orientation.
 - [ ] For the first recording test, be ready to allow microphone access.
+
+## Face photo setup
+
+- [ ] Open the same site with `#faces` appended to its URL.
+- [ ] For Happy, tap **Take or choose photo**, take a new picture, and confirm
+      the preview changes from the emoji to the photo.
+- [ ] Choose separate pictures for Neutral and Sad and confirm all three
+      previews remain distinct.
+- [ ] Return to the child URL without `#faces`. Confirm the three large buttons
+      show the custom photos and still fit without horizontal scrolling.
+- [ ] Reload Safari, then close and reopen it. Confirm all three photos persist.
+- [ ] Return to `#faces`, replace one photo, and confirm only that feeling
+      changes on the child screen.
+- [ ] Tap **Use emoji** for one feeling and confirm only that face returns to
+      its original emoji.
+- [ ] Confirm existing entries and recordings in `#log` were not changed by
+      replacing or resetting photos.
 
 ## Child screen
 
 - [ ] The page shows “How are you feeling?” and three large faces.
+- [ ] Configured photos appear; any feeling without a photo uses its emoji.
 - [ ] All three faces fit without horizontal scrolling.
 - [ ] Each face is easy to tap with a thumb and Safari does not zoom on a tap.
 - [ ] With VoiceOver enabled, the buttons are announced as Happy, Neutral,
@@ -70,5 +88,5 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 ## Shortcut
 
 - [ ] Run the Time of Day automation manually while the iPhone is unlocked.
-- [ ] Safari opens the GitHub Pages child URL, not the `#log` URL.
+- [ ] Safari opens the GitHub Pages child URL, not the `#log` or `#faces` URL.
 - [ ] The three-face screen is ready for one-tap use.

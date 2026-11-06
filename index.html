@@ -117,10 +117,24 @@
     }
 
     .face {
-      display: block;
-      font-size: clamp(3.7rem, 17vw, 6.5rem);
+      width: 100%;
+      display: grid;
+      place-items: center;
       line-height: 1;
+    }
+
+    .face-emoji {
+      font-size: clamp(3.7rem, 17vw, 6.5rem);
       filter: saturate(0.92);
+    }
+
+    .face-photo {
+      width: min(26vw, 142px);
+      aspect-ratio: 1;
+      display: block;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 5px 14px rgba(61, 45, 36, 0.2);
     }
 
     .tap-response {
@@ -217,7 +231,8 @@
       color: #3d6f66;
     }
 
-    .log-view {
+    .log-view,
+    .face-setup-view {
       width: min(100%, 760px);
       min-height: 100vh;
       min-height: 100dvh;
@@ -302,6 +317,133 @@
       cursor: pointer;
     }
 
+    .setup-title {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 8vw, 3rem);
+      letter-spacing: -0.035em;
+    }
+
+    .setup-intro {
+      max-width: 610px;
+      margin-bottom: 26px;
+      color: #635650;
+      font-size: 1.08rem;
+      line-height: 1.5;
+    }
+
+    .setup-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .setup-card {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+      border: 1px solid rgba(82, 65, 57, 0.13);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 10px 25px rgba(91, 67, 49, 0.1);
+    }
+
+    .setup-preview {
+      width: 104px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 50%;
+      background: #fff8ed;
+      font-size: 4.6rem;
+      line-height: 1;
+    }
+
+    .setup-preview-photo {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .setup-card-title {
+      margin-bottom: 12px;
+      font-size: 1.35rem;
+    }
+
+    .setup-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .photo-picker,
+    .default-button {
+      min-height: 50px;
+      padding: 10px 12px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #9bbdb6;
+      border-radius: 16px;
+      background: #eff8f5;
+      color: #315e57;
+      font-weight: 800;
+      line-height: 1.15;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .default-button {
+      border-color: #d5c4b6;
+      background: #fffaf3;
+      color: #635650;
+    }
+
+    .default-button:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .file-input:focus-visible + .photo-picker {
+      outline: 4px solid #246b64;
+      outline-offset: 4px;
+    }
+
+    .setup-status {
+      min-height: 1.5em;
+      margin: 22px 4px 0;
+      color: #3d6f66;
+      font-weight: 700;
+    }
+
+    @media (max-width: 430px) {
+      .setup-card {
+        grid-template-columns: 82px minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .setup-preview {
+        width: 82px;
+        font-size: 3.6rem;
+      }
+
+      .setup-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @keyframes warm-bounce {
       0% { transform: scale(0.88); }
       58% { transform: scale(1.08); }
@@ -331,13 +473,22 @@
       <h1 id="question" class="question">How are you feeling?</h1>
       <div class="face-grid">
         <button class="face-button" type="button" data-face="happy" aria-label="Happy">
-          <span class="face" aria-hidden="true">😊</span>
+          <span class="face" aria-hidden="true">
+            <span class="face-emoji" data-face-fallback="happy">😊</span>
+            <img class="face-photo" data-face-photo="happy" alt="" hidden>
+          </span>
         </button>
         <button class="face-button" type="button" data-face="neutral" aria-label="Neutral">
-          <span class="face" aria-hidden="true">😐</span>
+          <span class="face" aria-hidden="true">
+            <span class="face-emoji" data-face-fallback="neutral">😐</span>
+            <img class="face-photo" data-face-photo="neutral" alt="" hidden>
+          </span>
         </button>
         <button class="face-button" type="button" data-face="sad" aria-label="Sad">
-          <span class="face" aria-hidden="true">😢</span>
+          <span class="face" aria-hidden="true">
+            <span class="face-emoji" data-face-fallback="sad">😢</span>
+            <img class="face-photo" data-face-photo="sad" alt="" hidden>
+          </span>
         </button>
       </div>
       <p id="tapResponse" class="tap-response" aria-live="polite"></p>
@@ -374,16 +525,77 @@
     </div>
   </main>
 
+  <main id="faceSetupView" class="face-setup-view" hidden>
+    <h1 class="setup-title">Your face photos</h1>
+    <p class="setup-intro">
+      Take or choose one photo for each feeling. Photos are cropped on this
+      device and stay in this browser only.
+    </p>
+    <div class="setup-grid">
+      <section class="setup-card" aria-labelledby="happySetupTitle">
+        <div class="setup-preview" aria-hidden="true">
+          <span data-face-fallback="happy">😊</span>
+          <img class="setup-preview-photo" data-face-photo="happy" alt="" hidden>
+        </div>
+        <div>
+          <h2 id="happySetupTitle" class="setup-card-title">Happy</h2>
+          <div class="setup-actions">
+            <input id="happyPhotoInput" class="file-input" type="file" accept="image/*" data-face-image-input="happy">
+            <label class="photo-picker" for="happyPhotoInput">Take or choose photo</label>
+            <button class="default-button" type="button" data-reset-face="happy" disabled>Use emoji</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="setup-card" aria-labelledby="neutralSetupTitle">
+        <div class="setup-preview" aria-hidden="true">
+          <span data-face-fallback="neutral">😐</span>
+          <img class="setup-preview-photo" data-face-photo="neutral" alt="" hidden>
+        </div>
+        <div>
+          <h2 id="neutralSetupTitle" class="setup-card-title">Neutral</h2>
+          <div class="setup-actions">
+            <input id="neutralPhotoInput" class="file-input" type="file" accept="image/*" data-face-image-input="neutral">
+            <label class="photo-picker" for="neutralPhotoInput">Take or choose photo</label>
+            <button class="default-button" type="button" data-reset-face="neutral" disabled>Use emoji</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="setup-card" aria-labelledby="sadSetupTitle">
+        <div class="setup-preview" aria-hidden="true">
+          <span data-face-fallback="sad">😢</span>
+          <img class="setup-preview-photo" data-face-photo="sad" alt="" hidden>
+        </div>
+        <div>
+          <h2 id="sadSetupTitle" class="setup-card-title">Sad</h2>
+          <div class="setup-actions">
+            <input id="sadPhotoInput" class="file-input" type="file" accept="image/*" data-face-image-input="sad">
+            <label class="photo-picker" for="sadPhotoInput">Take or choose photo</label>
+            <button class="default-button" type="button" data-reset-face="sad" disabled>Use emoji</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <p id="faceSetupStatus" class="setup-status" role="status" aria-live="polite"></p>
+  </main>
+
   <script>
     (() => {
       "use strict";
 
       const DATABASE_NAME = "feelings-checkin";
-      const DATABASE_VERSION = 1;
-      const STORE_NAME = "checkins";
+      const DATABASE_VERSION = 2;
+      const CHECKINS_STORE_NAME = "checkins";
+      const FACE_IMAGES_STORE_NAME = "faceImages";
       const THANK_YOU_DURATION_MS = 2400;
       const RECORDING_LIMIT_MS = 10000;
       const STORAGE_TIMEOUT_MS = 2500;
+      const FACE_LABELS = {
+        happy: "Happy",
+        neutral: "Neutral",
+        sad: "Sad"
+      };
 
       const childView = document.querySelector("#childView");
       const checkinPanel = document.querySelector("#checkinPanel");
@@ -397,6 +609,10 @@
       const listeningIndicator = document.querySelector("#listeningIndicator");
       const logView = document.querySelector("#logView");
       const logContent = document.querySelector("#logContent");
+      const faceSetupView = document.querySelector("#faceSetupView");
+      const faceSetupStatus = document.querySelector("#faceSetupStatus");
+      const faceImageInputs = Array.from(document.querySelectorAll("[data-face-image-input]"));
+      const resetFaceButtons = Array.from(document.querySelectorAll("[data-reset-face]"));
 
       let databasePromise = null;
       let faceTapLocked = false;
@@ -406,6 +622,8 @@
       let resetTimer = null;
       let logRenderToken = 0;
       let audioPlayers = [];
+      let faceImagesReady = null;
+      const faceImageUrls = new Map();
 
       function logError(message, error) {
         // Technical details belong in developer tools, never in the child's UI.
@@ -450,12 +668,21 @@
 
           request.onupgradeneeded = () => {
             const database = request.result;
-            if (!database.objectStoreNames.contains(STORE_NAME)) {
+            if (!database.objectStoreNames.contains(CHECKINS_STORE_NAME)) {
               // autoIncrement supplies the required local record id. No account
               // or device identifier is created or stored.
-              database.createObjectStore(STORE_NAME, {
+              database.createObjectStore(CHECKINS_STORE_NAME, {
                 keyPath: "id",
                 autoIncrement: true
+              });
+            }
+
+            if (!database.objectStoreNames.contains(FACE_IMAGES_STORE_NAME)) {
+              // Face photos have a different lifecycle from check-ins, so a
+              // separate store lets a parent replace them without touching the
+              // child's history. The image Blob still never leaves IndexedDB.
+              database.createObjectStore(FACE_IMAGES_STORE_NAME, {
+                keyPath: "face"
               });
             }
           };
@@ -497,8 +724,8 @@
 
       function addRecord(database, record) {
         return new Promise((resolve, reject) => {
-          const transaction = database.transaction(STORE_NAME, "readwrite");
-          const request = transaction.objectStore(STORE_NAME).add(record);
+          const transaction = database.transaction(CHECKINS_STORE_NAME, "readwrite");
+          const request = transaction.objectStore(CHECKINS_STORE_NAME).add(record);
           let newId = null;
 
           request.onsuccess = () => {
@@ -517,8 +744,8 @@
 
       function updateRecordWithAudio(database, id, audio, audioType) {
         return new Promise((resolve, reject) => {
-          const transaction = database.transaction(STORE_NAME, "readwrite");
-          const store = transaction.objectStore(STORE_NAME);
+          const transaction = database.transaction(CHECKINS_STORE_NAME, "readwrite");
+          const store = transaction.objectStore(CHECKINS_STORE_NAME);
           const request = store.get(id);
           let operationError = null;
 
@@ -547,8 +774,8 @@
 
       function readAllRecords(database) {
         return new Promise((resolve, reject) => {
-          const transaction = database.transaction(STORE_NAME, "readonly");
-          const request = transaction.objectStore(STORE_NAME).getAll();
+          const transaction = database.transaction(CHECKINS_STORE_NAME, "readonly");
+          const request = transaction.objectStore(CHECKINS_STORE_NAME).getAll();
           let records = [];
 
           request.onsuccess = () => {
@@ -561,6 +788,59 @@
           };
           transaction.onabort = () => {
             reject(transaction.error || request.error || new Error("Read transaction was aborted"));
+          };
+        });
+      }
+
+      function putFaceImageRecord(database, face, image) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readwrite");
+          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).put({
+            face,
+            image,
+            updatedAt: new Date().toISOString()
+          });
+
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not save the face photo"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo transaction was aborted"));
+          };
+        });
+      }
+
+      function deleteFaceImageRecord(database, face) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readwrite");
+          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).delete(face);
+
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not remove the face photo"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo transaction was aborted"));
+          };
+        });
+      }
+
+      function readAllFaceImages(database) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readonly");
+          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).getAll();
+          let records = [];
+
+          request.onsuccess = () => {
+            records = request.result;
+          };
+          transaction.oncomplete = () => resolve(records);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not read face photos"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo read was aborted"));
           };
         });
       }
@@ -607,6 +887,195 @@
         } catch (error) {
           logError("The check-in log could not be read.", error);
           return [];
+        }
+      }
+
+      async function saveFaceImage(face, image) {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          await finishWithin(
+            putFaceImageRecord(database, face, image),
+            "Saving the face photo"
+          );
+          return true;
+        } catch (error) {
+          logError("The face photo could not be saved.", error);
+          return false;
+        }
+      }
+
+      async function removeFaceImage(face) {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          await finishWithin(
+            deleteFaceImageRecord(database, face),
+            "Removing the face photo"
+          );
+          return true;
+        } catch (error) {
+          logError("The face photo could not be removed.", error);
+          return false;
+        }
+      }
+
+      async function getFaceImages() {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(readAllFaceImages(database), "Reading face photos");
+        } catch (error) {
+          logError("The face photos could not be read.", error);
+          return [];
+        }
+      }
+
+      function displayFaceImage(face, image) {
+        const oldUrl = faceImageUrls.get(face);
+        const photoElements = document.querySelectorAll(`[data-face-photo="${face}"]`);
+        const fallbackElements = document.querySelectorAll(`[data-face-fallback="${face}"]`);
+        const resetButton = resetFaceButtons.find((button) => button.dataset.resetFace === face);
+
+        photoElements.forEach((element) => {
+          element.hidden = true;
+          element.removeAttribute("src");
+        });
+        if (oldUrl) {
+          URL.revokeObjectURL(oldUrl);
+          faceImageUrls.delete(face);
+        }
+
+        if (image instanceof Blob && image.size > 0) {
+          // One object URL can feed both the child button and setup preview.
+          // It points at the local Blob; it does not make a network request.
+          const url = URL.createObjectURL(image);
+          faceImageUrls.set(face, url);
+          photoElements.forEach((element) => {
+            element.src = url;
+            element.hidden = false;
+          });
+          fallbackElements.forEach((element) => {
+            element.hidden = true;
+          });
+          if (resetButton) resetButton.disabled = false;
+          return;
+        }
+
+        fallbackElements.forEach((element) => {
+          element.hidden = false;
+        });
+        if (resetButton) resetButton.disabled = true;
+      }
+
+      async function loadSavedFaceImages() {
+        const records = await getFaceImages();
+        records.forEach((record) => {
+          if (FACE_LABELS[record.face] && record.image instanceof Blob) {
+            displayFaceImage(record.face, record.image);
+          }
+        });
+      }
+
+      async function prepareFaceImage(file) {
+        if (!file.type.startsWith("image/")) {
+          throw new Error("The selected file is not an image");
+        }
+
+        const sourceUrl = URL.createObjectURL(file);
+        try {
+          const sourceImage = new Image();
+          sourceImage.decoding = "async";
+          await new Promise((resolve, reject) => {
+            sourceImage.onload = resolve;
+            sourceImage.onerror = () => reject(new Error("The selected image could not be opened"));
+            sourceImage.src = sourceUrl;
+          });
+
+          if (!sourceImage.naturalWidth || !sourceImage.naturalHeight) {
+            throw new Error("The selected image has no usable dimensions");
+          }
+
+          // Center-cropping keeps all three buttons consistent. Resizing to at
+          // most 720px avoids filling Safari's storage with full camera photos.
+          // Re-encoding also strips camera metadata such as GPS coordinates.
+          const sourceSide = Math.min(sourceImage.naturalWidth, sourceImage.naturalHeight);
+          const outputSize = Math.min(720, sourceSide);
+          const sourceX = (sourceImage.naturalWidth - sourceSide) / 2;
+          const sourceY = (sourceImage.naturalHeight - sourceSide) / 2;
+          const canvas = document.createElement("canvas");
+          canvas.width = outputSize;
+          canvas.height = outputSize;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Image resizing is unavailable");
+
+          context.fillStyle = "#fff8ed";
+          context.fillRect(0, 0, outputSize, outputSize);
+          context.drawImage(
+            sourceImage,
+            sourceX,
+            sourceY,
+            sourceSide,
+            sourceSide,
+            0,
+            0,
+            outputSize,
+            outputSize
+          );
+
+          return await new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error("The resized image could not be created"));
+            }, "image/jpeg", 0.86);
+          });
+        } finally {
+          URL.revokeObjectURL(sourceUrl);
+        }
+      }
+
+      async function handleFaceImageChange(event) {
+        const input = event.currentTarget;
+        const face = input.dataset.faceImageInput;
+        const file = input.files && input.files[0];
+        input.value = "";
+        if (!file || !FACE_LABELS[face]) return;
+
+        input.disabled = true;
+        faceSetupStatus.textContent = `Preparing ${FACE_LABELS[face].toLowerCase()} photo…`;
+
+        try {
+          await faceImagesReady;
+          const image = await prepareFaceImage(file);
+          const wasSaved = await saveFaceImage(face, image);
+          if (!wasSaved) {
+            faceSetupStatus.textContent = "That photo couldn’t be saved. Please try another.";
+            return;
+          }
+
+          displayFaceImage(face, image);
+          faceSetupStatus.textContent = `${FACE_LABELS[face]} photo saved on this device.`;
+        } catch (error) {
+          logError("The selected face photo could not be prepared.", error);
+          faceSetupStatus.textContent = "That photo couldn’t be used. Please try another.";
+        } finally {
+          input.disabled = false;
+        }
+      }
+
+      async function handleResetFace(event) {
+        const button = event.currentTarget;
+        const face = button.dataset.resetFace;
+        if (!FACE_LABELS[face]) return;
+
+        button.disabled = true;
+        faceSetupStatus.textContent = `Restoring the ${FACE_LABELS[face].toLowerCase()} emoji…`;
+        await faceImagesReady;
+        const wasRemoved = await removeFaceImage(face);
+
+        if (wasRemoved) {
+          displayFaceImage(face, null);
+          faceSetupStatus.textContent = `${FACE_LABELS[face]} now uses the emoji.`;
+        } else {
+          button.disabled = false;
+          faceSetupStatus.textContent = "That photo couldn’t be reset. Please try again.";
         }
       }
 
@@ -1057,8 +1526,10 @@
 
       function renderRoute() {
         const showLog = window.location.hash === "#log";
-        childView.hidden = showLog;
+        const showFaceSetup = window.location.hash === "#faces";
+        childView.hidden = showLog || showFaceSetup;
         logView.hidden = !showLog;
+        faceSetupView.hidden = !showFaceSetup;
 
         if (showLog) {
           cancelSpeech();
@@ -1066,10 +1537,13 @@
         } else {
           ++logRenderToken;
           cleanUpAudioPlayers();
+          if (showFaceSetup) cancelSpeech();
         }
       }
 
       faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
+      faceImageInputs.forEach((input) => input.addEventListener("change", handleFaceImageChange));
+      resetFaceButtons.forEach((button) => button.addEventListener("click", handleResetFace));
       recordButton.addEventListener("click", handleRecordButton);
       noThanksButton.addEventListener("click", handleNoThanks);
       window.addEventListener("hashchange", renderRoute);
@@ -1082,6 +1556,7 @@
       });
 
       showFaceScreen();
+      faceImagesReady = loadSavedFaceImages();
       renderRoute();
     })();
   </script>
