@@ -1,0 +1,2603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff8ed">
+  <title>Feelings Check-in</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fff8ed;
+      color: #332b28;
+      font-synthesis: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(255, 209, 165, 0.48), transparent 28rem),
+        radial-gradient(circle at 92% 88%, rgba(182, 222, 208, 0.44), transparent 25rem),
+        #fff8ed;
+    }
+
+    body {
+      min-width: 280px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    button {
+      font: inherit;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible {
+      outline: 4px solid #246b64;
+      outline-offset: 4px;
+    }
+
+    .child-view {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(6px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(6px, env(safe-area-inset-left));
+    }
+
+    .panel {
+      width: min(100%, 560px);
+      text-align: center;
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    .question,
+    .voice-title,
+    .thanks-title {
+      margin-bottom: clamp(24px, 7vh, 54px);
+      font-size: clamp(2rem, 9vw, 3.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+    }
+
+    .face-grid {
+      width: min(96vw, 540px);
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: min(2vw, 10px);
+    }
+
+    .face-button {
+      width: 100%;
+      min-height: clamp(108px, 34vw, 176px);
+      padding: 8px 2px;
+      border: 3px solid rgba(82, 65, 57, 0.13);
+      border-radius: clamp(24px, 8vw, 42px);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 28px rgba(91, 67, 49, 0.14);
+      cursor: pointer;
+      transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+    }
+
+    .face-button:active {
+      transform: scale(0.96);
+    }
+
+    .face-button:disabled {
+      cursor: default;
+      opacity: 0.48;
+    }
+
+    .face-button.is-selected {
+      opacity: 1;
+      box-shadow: 0 15px 34px rgba(91, 67, 49, 0.2);
+      animation: warm-bounce 420ms ease-out;
+    }
+
+    .face {
+      width: 100%;
+      display: grid;
+      place-items: center;
+      line-height: 1;
+    }
+
+    .face-emoji {
+      font-size: clamp(3.7rem, 17vw, 6.5rem);
+      filter: saturate(0.92);
+    }
+
+    .face-photo {
+      width: min(26vw, 142px);
+      aspect-ratio: 1;
+      display: block;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 5px 14px rgba(61, 45, 36, 0.2);
+    }
+
+    .tap-response {
+      min-height: 2.1em;
+      margin: clamp(18px, 5vh, 36px) 12px 0;
+      font-size: clamp(1.25rem, 5.4vw, 1.75rem);
+      font-weight: 700;
+      line-height: 1.25;
+      color: #3d6f66;
+      opacity: 0;
+      transition: opacity 140ms ease;
+    }
+
+    .tap-response.is-visible {
+      opacity: 1;
+    }
+
+    .voice-title {
+      margin-bottom: clamp(22px, 6vh, 44px);
+    }
+
+    .voice-actions {
+      width: min(94vw, 500px);
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(12px, 4vw, 22px);
+    }
+
+    .choice-button {
+      min-height: clamp(132px, 38vw, 184px);
+      padding: 14px 8px;
+      border: 3px solid #d5c4b6;
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #332b28;
+      box-shadow: 0 12px 28px rgba(91, 67, 49, 0.15);
+      font-size: clamp(1.15rem, 5vw, 1.5rem);
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .choice-button:active {
+      transform: scale(0.97);
+    }
+
+    .choice-button:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+
+    .choice-icon {
+      display: block;
+      margin-bottom: 9px;
+      font-size: clamp(2.7rem, 13vw, 4.7rem);
+      line-height: 1;
+    }
+
+    .listening {
+      min-height: 42px;
+      margin: clamp(20px, 6vh, 38px) 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #3d6f66;
+      font-size: 1.2rem;
+      font-weight: 700;
+      visibility: hidden;
+    }
+
+    .listening.is-visible {
+      visibility: visible;
+    }
+
+    .listening-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #5ba99b;
+      animation: calm-pulse 1.5s ease-in-out infinite;
+    }
+
+    .thanks-symbol {
+      display: block;
+      margin-bottom: 18px;
+      font-size: clamp(4rem, 20vw, 7rem);
+      line-height: 1;
+      animation: warm-bounce 420ms ease-out;
+    }
+
+    .thanks-title {
+      margin-bottom: 0;
+      color: #3d6f66;
+    }
+
+    .log-view,
+    .face-setup-view {
+      width: min(100%, 760px);
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin-inline: auto;
+      padding:
+        max(26px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(36px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+    }
+
+    .log-title {
+      margin-bottom: 30px;
+      font-size: clamp(2rem, 8vw, 3rem);
+      letter-spacing: -0.035em;
+    }
+
+    .backup-panel {
+      margin-bottom: 26px;
+      padding: 18px;
+      border: 1px solid #ded1c5;
+      border-radius: 20px;
+      background: #fffaf3;
+    }
+
+    .backup-panel summary {
+      min-height: 44px;
+      padding-block: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .backup-panel p {
+      margin: 12px 0;
+      line-height: 1.5;
+    }
+
+    .backup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .backup-actions a {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .log-loading,
+    .log-empty {
+      padding: 38px 22px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.76);
+      color: #635650;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .day-group + .day-group {
+      margin-top: 34px;
+    }
+
+    .day-heading {
+      margin-bottom: 12px;
+      color: #635650;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .log-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      overflow: hidden;
+      border: 1px solid rgba(82, 65, 57, 0.13);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 10px 25px rgba(91, 67, 49, 0.1);
+    }
+
+    .log-entry {
+      min-height: 82px;
+      padding: 13px 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .log-entry + .log-entry {
+      border-top: 1px solid rgba(82, 65, 57, 0.12);
+    }
+
+    .log-face {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      font-size: 2.6rem;
+      line-height: 1;
+    }
+
+    .log-face-photo {
+      width: 54px;
+      height: 54px;
+      display: block;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 3px 9px rgba(61, 45, 36, 0.18);
+    }
+
+    .log-time {
+      font-size: 1.08rem;
+      font-weight: 700;
+    }
+
+    .play-button {
+      min-width: 82px;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 2px solid #9bbdb6;
+      border-radius: 18px;
+      background: #eff8f5;
+      color: #315e57;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .playback-status {
+      display: block;
+      max-width: 150px;
+      margin-top: 6px;
+      color: #635650;
+      font-size: 0.9rem;
+    }
+
+    .setup-title {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 8vw, 3rem);
+      letter-spacing: -0.035em;
+    }
+
+    .setup-intro {
+      max-width: 610px;
+      margin-bottom: 26px;
+      color: #635650;
+      font-size: 1.08rem;
+      line-height: 1.5;
+    }
+
+    .setup-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .setup-card {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+      border: 1px solid rgba(82, 65, 57, 0.13);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 10px 25px rgba(91, 67, 49, 0.1);
+    }
+
+    .setup-preview {
+      width: 104px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 50%;
+      background: #fff8ed;
+      font-size: 4.6rem;
+      line-height: 1;
+    }
+
+    .setup-preview-photo {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .setup-card-title {
+      margin-bottom: 12px;
+      font-size: 1.35rem;
+    }
+
+    .setup-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .photo-picker,
+    .default-button {
+      min-height: 50px;
+      padding: 10px 12px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #9bbdb6;
+      border-radius: 16px;
+      background: #eff8f5;
+      color: #315e57;
+      font-weight: 800;
+      line-height: 1.15;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .default-button {
+      border-color: #d5c4b6;
+      background: #fffaf3;
+      color: #635650;
+    }
+
+    .default-button:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .file-input:focus-visible + .photo-picker {
+      outline: 4px solid #246b64;
+      outline-offset: 4px;
+    }
+
+    .setup-status {
+      min-height: 1.5em;
+      margin: 22px 4px 0;
+      color: #3d6f66;
+      font-weight: 700;
+    }
+
+    @media (max-width: 430px) {
+      .setup-card {
+        grid-template-columns: 82px minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .setup-preview {
+        width: 82px;
+        font-size: 3.6rem;
+      }
+
+      .setup-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes warm-bounce {
+      0% { transform: scale(0.88); }
+      58% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes calm-pulse {
+      0%, 100% { transform: scale(0.82); opacity: 0.48; }
+      50% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="childView" class="child-view">
+    <section id="checkinPanel" class="panel" aria-labelledby="question">
+      <h1 id="question" class="question">How are you feeling?</h1>
+      <div class="face-grid">
+        <button class="face-button" type="button" data-face="happy" aria-label="Happy">
+          <span class="face" aria-hidden="true">
+            <span class="face-emoji" data-face-fallback="happy">😊</span>
+            <img class="face-photo" data-face-photo="happy" alt="" hidden>
+          </span>
+        </button>
+        <button class="face-button" type="button" data-face="neutral" aria-label="Neutral">
+          <span class="face" aria-hidden="true">
+            <span class="face-emoji" data-face-fallback="neutral">😐</span>
+            <img class="face-photo" data-face-photo="neutral" alt="" hidden>
+          </span>
+        </button>
+        <button class="face-button" type="button" data-face="sad" aria-label="Sad">
+          <span class="face" aria-hidden="true">
+            <span class="face-emoji" data-face-fallback="sad">😢</span>
+            <img class="face-photo" data-face-photo="sad" alt="" hidden>
+          </span>
+        </button>
+      </div>
+      <p id="tapResponse" class="tap-response" aria-live="polite"></p>
+    </section>
+
+    <section id="voicePanel" class="panel" aria-labelledby="voiceTitle" hidden>
+      <h1 id="voiceTitle" class="voice-title">Tell us why you’re sad</h1>
+      <div class="voice-actions">
+        <button id="recordButton" class="choice-button" type="button" aria-label="Record a voice clip">
+          <span class="choice-icon" aria-hidden="true">🎙️</span>
+          <span id="recordButtonText">Record</span>
+        </button>
+        <button id="noThanksButton" class="choice-button" type="button">
+          <span class="choice-icon" aria-hidden="true">💛</span>
+          No thanks
+        </button>
+      </div>
+      <div id="listeningIndicator" class="listening" role="status" aria-live="polite">
+        <span class="listening-dot" aria-hidden="true"></span>
+        <span>I’m listening</span>
+      </div>
+    </section>
+
+    <section id="thanksPanel" class="panel" aria-labelledby="thanksTitle" hidden>
+      <span class="thanks-symbol" aria-hidden="true">💛</span>
+      <h1 id="thanksTitle" class="thanks-title">Thanks for telling me!</h1>
+    </section>
+  </main>
+
+  <main id="logView" class="log-view" hidden>
+    <h1 id="logTitle" class="log-title">Check-ins</h1>
+    <details id="backupPanel" class="backup-panel">
+      <summary>Backup and restore</summary>
+      <p>Backups can contain private check-ins, recordings, and photos. Keep the file in a private place. On iPhone, choose On My iPhone in Files.</p>
+      <div class="backup-actions">
+        <button id="exportBackup" class="play-button" type="button">Prepare backup</button>
+        <button id="chooseBackup" class="play-button" type="button">Choose backup to restore</button>
+        <input id="backupFile" type="file" accept=".json,application/json" aria-label="Choose a backup file" hidden>
+      </div>
+      <div id="backupSaveActions" class="backup-actions" hidden>
+        <button id="shareBackup" class="play-button" type="button" hidden>Open save options</button>
+        <a id="downloadBackup" class="play-button">Download backup</a>
+      </div>
+      <p id="backupStatus" role="status"></p>
+      <div id="restoreActions" class="backup-actions" hidden>
+        <button id="confirmRestore" class="play-button" type="button">Restore check-ins</button>
+        <button id="cancelRestore" class="play-button" type="button">Cancel restore</button>
+      </div>
+    </details>
+    <p id="checkinStorageStatus" role="status" hidden></p>
+    <div id="logContent">
+      <p class="log-loading">Loading…</p>
+    </div>
+  </main>
+
+  <main id="faceSetupView" class="face-setup-view" hidden>
+    <h1 class="setup-title">Your face photos</h1>
+    <p class="setup-intro">
+      Take or choose one photo for each feeling. Photos are cropped on this
+      device and stay in this browser only.
+    </p>
+    <div class="setup-grid">
+      <section class="setup-card" aria-labelledby="happySetupTitle">
+        <div class="setup-preview" aria-hidden="true">
+          <span data-face-fallback="happy">😊</span>
+          <img class="setup-preview-photo" data-face-photo="happy" alt="" hidden>
+        </div>
+        <div>
+          <h2 id="happySetupTitle" class="setup-card-title">Happy</h2>
+          <div class="setup-actions">
+            <input id="happyPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="happy">
+            <label class="photo-picker" for="happyPhotoInput">Take or choose photo</label>
+            <button class="default-button" type="button" data-reset-face="happy" disabled>Use emoji</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="setup-card" aria-labelledby="neutralSetupTitle">
+        <div class="setup-preview" aria-hidden="true">
+          <span data-face-fallback="neutral">😐</span>
+          <img class="setup-preview-photo" data-face-photo="neutral" alt="" hidden>
+        </div>
+        <div>
+          <h2 id="neutralSetupTitle" class="setup-card-title">Neutral</h2>
+          <div class="setup-actions">
+            <input id="neutralPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="neutral">
+            <label class="photo-picker" for="neutralPhotoInput">Take or choose photo</label>
+            <button class="default-button" type="button" data-reset-face="neutral" disabled>Use emoji</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="setup-card" aria-labelledby="sadSetupTitle">
+        <div class="setup-preview" aria-hidden="true">
+          <span data-face-fallback="sad">😢</span>
+          <img class="setup-preview-photo" data-face-photo="sad" alt="" hidden>
+        </div>
+        <div>
+          <h2 id="sadSetupTitle" class="setup-card-title">Sad</h2>
+          <div class="setup-actions">
+            <input id="sadPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="sad">
+            <label class="photo-picker" for="sadPhotoInput">Take or choose photo</label>
+            <button class="default-button" type="button" data-reset-face="sad" disabled>Use emoji</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <p id="faceSetupStatus" class="setup-status" role="status" aria-live="polite"></p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const DATABASE_NAME = "feelings-checkin";
+      const DATABASE_VERSION = 4;
+      const CHECKINS_STORE_NAME = "checkins";
+      const FACE_IMAGES_STORE_NAME = "faceImages";
+      const FACE_IMAGE_VERSIONS_STORE_NAME = "faceImageVersions";
+      const BACKUP_STORES = [
+        CHECKINS_STORE_NAME,
+        FACE_IMAGE_VERSIONS_STORE_NAME,
+        FACE_IMAGES_STORE_NAME
+      ];
+      const BACKUP_FORMAT = "feelings-checkin-backup";
+      const BACKUP_VERSION = 1;
+      const MAX_BACKUP_FILE_BYTES = 20 * 1024 * 1024;
+      const MAX_BACKUP_MEDIA_BYTES = 12 * 1024 * 1024;
+      const MAX_BACKUP_ITEM_BYTES = 2 * 1024 * 1024;
+      const MAX_BACKUP_ROWS = 5000;
+      const THANK_YOU_DURATION_MS = 2400;
+      const RECORDING_LIMIT_MS = 10000;
+      const STORAGE_TIMEOUT_MS = 2500;
+      const PHOTO_STORAGE_TIMEOUT_MS = 15000;
+      const FACE_LABELS = {
+        happy: "Happy",
+        neutral: "Neutral",
+        sad: "Sad"
+      };
+
+      const childView = document.querySelector("#childView");
+      const checkinPanel = document.querySelector("#checkinPanel");
+      const voicePanel = document.querySelector("#voicePanel");
+      const thanksPanel = document.querySelector("#thanksPanel");
+      const faceButtons = Array.from(document.querySelectorAll(".face-button"));
+      const tapResponse = document.querySelector("#tapResponse");
+      const recordButton = document.querySelector("#recordButton");
+      const recordButtonText = document.querySelector("#recordButtonText");
+      const noThanksButton = document.querySelector("#noThanksButton");
+      const listeningIndicator = document.querySelector("#listeningIndicator");
+      const logView = document.querySelector("#logView");
+      const logTitle = document.querySelector("#logTitle");
+      const logContent = document.querySelector("#logContent");
+      const checkinStorageStatus = document.querySelector("#checkinStorageStatus");
+      const backupPanel = document.querySelector("#backupPanel");
+      const exportBackupButton = document.querySelector("#exportBackup");
+      const chooseBackupButton = document.querySelector("#chooseBackup");
+      const backupFile = document.querySelector("#backupFile");
+      const backupSaveActions = document.querySelector("#backupSaveActions");
+      const shareBackupButton = document.querySelector("#shareBackup");
+      const downloadBackupLink = document.querySelector("#downloadBackup");
+      const backupStatus = document.querySelector("#backupStatus");
+      const restoreActions = document.querySelector("#restoreActions");
+      const confirmRestoreButton = document.querySelector("#confirmRestore");
+      const cancelRestoreButton = document.querySelector("#cancelRestore");
+      const faceSetupView = document.querySelector("#faceSetupView");
+      const faceSetupStatus = document.querySelector("#faceSetupStatus");
+      const faceImageInputs = Array.from(document.querySelectorAll("[data-face-image-input]"));
+      const resetFaceButtons = Array.from(document.querySelectorAll("[data-reset-face]"));
+
+      let databasePromise = null;
+      let faceTapLocked = false;
+      let faceInteraction = 0;
+      let voiceChoiceLocked = false;
+      let currentSadCheckInId = null;
+      let activeRecording = null;
+      let resetTimer = null;
+      let logRenderToken = 0;
+      let audioPlayers = [];
+      let faceImagesReady = null;
+      let lastFaceImageSaveError = null;
+      let databaseUpgradeBlocked = false;
+      let preparedBackupFile = null;
+      let backupDownloadUrl = null;
+      let pendingRestore = null;
+      let backupBusy = false;
+      let backupViewVersion = 0;
+      let lastBackupRoute = null;
+      const faceImageUrls = new Map();
+      const faceImageVersionIds = new Map();
+      const logFaceImageUrls = new Map();
+
+      function logError(message, error) {
+        // Technical details belong in developer tools, never in the child's UI.
+        console.error(`[Feelings Check-in] ${message}`, error);
+      }
+
+      function reportCheckinStorageIssue(message) {
+        checkinStorageStatus.textContent = message;
+        checkinStorageStatus.hidden = !message;
+      }
+
+      function wait(milliseconds) {
+        return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+      }
+
+      function makeDatabaseBlockedError() {
+        const error = new Error("IndexedDB open request was blocked by another tab");
+        error.code = "database-blocked";
+        return error;
+      }
+
+      async function finishWithin(promise, label, timeoutMilliseconds = STORAGE_TIMEOUT_MS) {
+        // IndexedDB can remain pending if another tab blocks an upgrade. A short
+        // timeout keeps storage trouble from trapping the child on one screen.
+        let timeoutId;
+        const timeout = new Promise((resolve, reject) => {
+          timeoutId = window.setTimeout(() => {
+            reject(new Error(`${label} timed out`));
+          }, timeoutMilliseconds);
+        });
+
+        try {
+          return await Promise.race([promise, timeout]);
+        } finally {
+          window.clearTimeout(timeoutId);
+        }
+      }
+
+      function openDatabase() {
+        if (!("indexedDB" in window)) {
+          return Promise.reject(new Error("IndexedDB is unavailable"));
+        }
+
+        if (databasePromise) {
+          return databasePromise;
+        }
+
+        // IndexedDB uses events. This wrapper turns the open request into a
+        // promise so the rest of the app can use straightforward async/await.
+        databasePromise = new Promise((resolve, reject) => {
+          const request = window.indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+          let settled = false;
+
+          request.onupgradeneeded = () => {
+            const database = request.result;
+            if (!database.objectStoreNames.contains(CHECKINS_STORE_NAME)) {
+              // autoIncrement supplies the required local record id. No account
+              // or device identifier is created or stored.
+              database.createObjectStore(CHECKINS_STORE_NAME, {
+                keyPath: "id",
+                autoIncrement: true
+              });
+            }
+
+            if (!database.objectStoreNames.contains(FACE_IMAGES_STORE_NAME)) {
+              // Face photos have a different lifecycle from check-ins, so a
+              // separate store lets a parent replace them without touching the
+              // child's history. The image Blob still never leaves IndexedDB.
+              database.createObjectStore(FACE_IMAGES_STORE_NAME, {
+                keyPath: "face"
+              });
+            }
+
+            const upgrade = request.transaction;
+            addPortableIds(upgrade.objectStore(CHECKINS_STORE_NAME), true);
+
+            if (!database.objectStoreNames.contains(FACE_IMAGE_VERSIONS_STORE_NAME)) {
+              // Each saved photo version gets its own local id. A check-in can
+              // reference that id without copying the same Blob into every row.
+              const versionStore = database.createObjectStore(FACE_IMAGE_VERSIONS_STORE_NAME, {
+                keyPath: "id",
+                autoIncrement: true
+              });
+              versionStore.createIndex("portableId", "portableId", { unique: true });
+              const currentStore = upgrade.objectStore(FACE_IMAGES_STORE_NAME);
+              const cursorRequest = currentStore.openCursor();
+
+              // Version 2 stored only the current photo. Preserve that photo as
+              // the first version so future check-ins can snapshot it without
+              // asking the parent to upload it again.
+              cursorRequest.onsuccess = () => {
+                const cursor = cursorRequest.result;
+                if (!cursor) return;
+
+                const record = cursor.value;
+                if (record.image instanceof Blob && record.versionId === undefined) {
+                  const versionRequest = versionStore.add({
+                    face: record.face,
+                    image: record.image,
+                    createdAt: record.updatedAt || new Date().toISOString(),
+                    portableId: crypto.randomUUID()
+                  });
+                  versionRequest.onsuccess = () => {
+                    record.versionId = versionRequest.result;
+                    const updateRequest = cursor.update(record);
+                    updateRequest.onsuccess = () => cursor.continue();
+                  };
+                  return;
+                }
+
+                cursor.continue();
+              };
+            } else {
+              addPortableIds(upgrade.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME), false);
+            }
+          };
+
+          request.onsuccess = () => {
+            databaseUpgradeBlocked = false;
+            if (settled) {
+              request.result.close();
+              return;
+            }
+
+            settled = true;
+            const database = request.result;
+            database.onversionchange = () => {
+              database.close();
+              databasePromise = null;
+            };
+            resolve(database);
+          };
+
+          request.onerror = () => {
+            if (settled) return;
+            settled = true;
+            reject(request.error || new Error("Could not open IndexedDB"));
+          };
+
+          request.onblocked = () => {
+            if (settled) return;
+            databaseUpgradeBlocked = true;
+            settled = true;
+            reject(makeDatabaseBlockedError());
+          };
+        }).catch((error) => {
+          // A later interaction is allowed to retry after a temporary failure.
+          databasePromise = null;
+          throw error;
+        });
+
+        return databasePromise;
+      }
+
+      function addPortableIds(store, isCheckinStore) {
+        // The primary key still identifies the row within this browser. The
+        // portable ID travels with the row when restored into another store.
+        store.createIndex("portableId", "portableId", { unique: true });
+        const request = store.openCursor();
+        request.onsuccess = () => {
+          const cursor = request.result;
+          if (!cursor) return;
+
+          const record = cursor.value;
+          record.portableId = crypto.randomUUID();
+          if (isCheckinStore) {
+            record.sourceId = record.id;
+            record.revision = 0;
+          }
+          cursor.update(record);
+          cursor.continue();
+        };
+      }
+
+      function addRecord(database, record) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(CHECKINS_STORE_NAME, "readwrite");
+          const request = transaction.objectStore(CHECKINS_STORE_NAME).add({
+            ...record,
+            portableId: crypto.randomUUID(),
+            revision: 0
+          });
+          let newId = null;
+
+          request.onsuccess = () => {
+            newId = request.result;
+          };
+
+          transaction.oncomplete = () => resolve(newId);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not save check-in"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Check-in transaction was aborted"));
+          };
+        });
+      }
+
+      function updateRecordWithAudio(database, id, audio, audioType) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(CHECKINS_STORE_NAME, "readwrite");
+          const store = transaction.objectStore(CHECKINS_STORE_NAME);
+          const request = store.get(id);
+          let operationError = null;
+
+          request.onsuccess = () => {
+            const record = request.result;
+            if (!record) {
+              operationError = new Error("The sad check-in could not be found");
+              transaction.abort();
+              return;
+            }
+
+            record.audio = audio;
+            record.audioType = audioType;
+            record.revision += 1;
+            store.put(record);
+          };
+
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => {
+            reject(operationError || transaction.error || new Error("Could not attach audio"));
+          };
+          transaction.onabort = () => {
+            reject(operationError || transaction.error || new Error("Audio transaction was aborted"));
+          };
+        });
+      }
+
+      function readAllRecords(database) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(CHECKINS_STORE_NAME, "readonly");
+          const request = transaction.objectStore(CHECKINS_STORE_NAME).getAll();
+          let records = [];
+
+          request.onsuccess = () => {
+            records = request.result;
+          };
+
+          transaction.oncomplete = () => resolve(records);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not read check-ins"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Read transaction was aborted"));
+          };
+        });
+      }
+
+      function putFaceImageRecord(database, face, image) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(
+            [FACE_IMAGES_STORE_NAME, FACE_IMAGE_VERSIONS_STORE_NAME],
+            "readwrite"
+          );
+          const currentStore = transaction.objectStore(FACE_IMAGES_STORE_NAME);
+          const versionStore = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME);
+          const updatedAt = new Date().toISOString();
+          const versionRequest = versionStore.add({
+            face,
+            image,
+            createdAt: updatedAt,
+            portableId: crypto.randomUUID()
+          });
+          let versionId = null;
+
+          versionRequest.onsuccess = () => {
+            versionId = versionRequest.result;
+            currentStore.put({ face, image, updatedAt, versionId });
+          };
+
+          // Both writes share one transaction: a photo cannot become current
+          // unless its immutable history version was also saved successfully.
+          transaction.oncomplete = () => resolve(versionId);
+          transaction.onerror = () => {
+            reject(transaction.error || versionRequest.error || new Error("Could not save the face photo"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || versionRequest.error || new Error("Face photo transaction was aborted"));
+          };
+        });
+      }
+
+      function deleteFaceImageRecord(database, face) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readwrite");
+          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).delete(face);
+
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not remove the face photo"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo transaction was aborted"));
+          };
+        });
+      }
+
+      function readAllFaceImages(database) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readonly");
+          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).getAll();
+          let records = [];
+
+          request.onsuccess = () => {
+            records = request.result;
+          };
+          transaction.oncomplete = () => resolve(records);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not read face photos"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo read was aborted"));
+          };
+        });
+      }
+
+      function readAllFaceImageVersions(database) {
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction(FACE_IMAGE_VERSIONS_STORE_NAME, "readonly");
+          const request = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME).getAll();
+          let records = [];
+
+          request.onsuccess = () => {
+            records = request.result;
+          };
+          transaction.oncomplete = () => resolve(records);
+          transaction.onerror = () => {
+            reject(transaction.error || request.error || new Error("Could not read face photo history"));
+          };
+          transaction.onabort = () => {
+            reject(transaction.error || request.error || new Error("Face photo history read was aborted"));
+          };
+        });
+      }
+
+      async function saveCheckIn(face, timestamp, faceImageVersionId) {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(
+            addRecord(database, {
+              face,
+              timestamp,
+              audio: null,
+              audioType: null,
+              faceImageVersionId
+            }),
+            "Saving the check-in"
+          );
+        } catch (error) {
+          logError("The check-in could not be saved.", error);
+          reportCheckinStorageIssue("A recent check-in could not be confirmed. Check the log before relying on it.");
+          return null;
+        }
+      }
+
+      async function attachAudio(id, audio, audioType) {
+        if (id === null) {
+          logError("The voice clip could not be attached because the sad check-in was not saved.", new Error("Missing check-in id"));
+          return;
+        }
+
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          await finishWithin(
+            updateRecordWithAudio(database, id, audio, audioType),
+            "Attaching the voice clip"
+          );
+        } catch (error) {
+          logError("The voice clip could not be attached.", error);
+          reportCheckinStorageIssue("A recent voice clip could not be confirmed. Check for it in the log.");
+        }
+      }
+
+      async function getCheckIns() {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(readAllRecords(database), "Reading check-ins");
+        } catch (error) {
+          logError("The check-in log could not be read.", error);
+          throw error;
+        }
+      }
+
+      async function saveFaceImage(face, image) {
+        lastFaceImageSaveError = null;
+        if (databaseUpgradeBlocked) {
+          lastFaceImageSaveError = makeDatabaseBlockedError();
+          logError("The face photo could not be saved.", lastFaceImageSaveError);
+          return null;
+        }
+
+        try {
+          // Parent setup can wait longer than the child's one-tap flow. iOS may
+          // need several seconds to finish a database upgrade or write a photo.
+          const database = await finishWithin(
+            openDatabase(),
+            "Opening storage",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
+          return await finishWithin(
+            putFaceImageRecord(database, face, image),
+            "Saving the face photo",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
+        } catch (error) {
+          lastFaceImageSaveError = error;
+          logError("The face photo could not be saved.", error);
+          return null;
+        }
+      }
+
+      function faceImageSaveMessage(error) {
+        if (
+          databaseUpgradeBlocked ||
+          (error && (error.code === "database-blocked" || error.message.includes("blocked")))
+        ) {
+          return "Close other Feelings Check-in tabs, reload this page, and try again.";
+        }
+        if (error && error.name === "QuotaExceededError") {
+          return "Safari does not have enough local storage for that photo.";
+        }
+        return "That photo couldn’t be saved. Reload this page and try again.";
+      }
+
+      async function removeFaceImage(face) {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          await finishWithin(
+            deleteFaceImageRecord(database, face),
+            "Removing the face photo"
+          );
+          return true;
+        } catch (error) {
+          logError("The face photo could not be removed.", error);
+          return false;
+        }
+      }
+
+      async function getFaceImages() {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(readAllFaceImages(database), "Reading face photos");
+        } catch (error) {
+          logError("The face photos could not be read.", error);
+          return [];
+        }
+      }
+
+      async function getFaceImageVersions() {
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          return await finishWithin(
+            readAllFaceImageVersions(database),
+            "Reading face photo history"
+          );
+        } catch (error) {
+          logError("The face photo history could not be read.", error);
+          throw error;
+        }
+      }
+
+      class BackupError extends Error {
+        constructor(message, code) {
+          super(message);
+          this.code = code;
+        }
+      }
+
+      function requireBackup(condition, message) {
+        if (!condition) throw new BackupError(message);
+      }
+
+      function isBackupId(value) {
+        return typeof value === "string" &&
+          /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/.test(value);
+      }
+
+      function isSavedTimestamp(value) {
+        if (typeof value !== "string" || value.length > 30) return false;
+        const date = new Date(value);
+        return Number.isFinite(date.getTime()) && date.toISOString() === value;
+      }
+
+      function isFace(value) {
+        return typeof value === "string" && Object.hasOwn(FACE_LABELS, value);
+      }
+
+      function isAudioType(value) {
+        return typeof value === "string" && value.length <= 160 &&
+          /^(?:audio\/[a-z\d.+-]+|video\/(?:mp4|webm))(?:;[ -~]+)?$/i.test(value);
+      }
+
+      function isMediaType(value, kind) {
+        if (kind === "photo") return value === "image/jpeg" || value === "image/png";
+        return value === "" || (isAudioType(value) && value === value.toLowerCase());
+      }
+
+      function validateBackupRecords(backup) {
+        requireBackup(backup?.format === BACKUP_FORMAT, "Choose a Feelings Check-in backup file.");
+        requireBackup(backup.version === BACKUP_VERSION, "This backup version is unsupported.");
+        requireBackup(isSavedTimestamp(backup.exportedAt), "The backup timestamp is invalid.");
+        requireBackup(
+          backup.recoveryOnly === undefined || backup.recoveryOnly === true,
+          "The backup recovery setting is invalid."
+        );
+        requireBackup(
+          [backup.checkins, backup.photoVersions, backup.currentPhotos].every(Array.isArray),
+          "The backup is missing check-ins or photo data."
+        );
+        requireBackup(
+          backup.checkins.length <= MAX_BACKUP_ROWS && backup.photoVersions.length <= MAX_BACKUP_ROWS &&
+          backup.currentPhotos.length <= Object.keys(FACE_LABELS).length,
+          "This backup has too many entries for this version of the app."
+        );
+
+        const photos = new Map();
+        for (const photo of backup.photoVersions) {
+          requireBackup(
+            isBackupId(photo?.portableId) && isFace(photo.face) &&
+            isSavedTimestamp(photo.createdAt) && photo.image,
+            "The backup contains an invalid photo entry."
+          );
+          requireBackup(!photos.has(photo.portableId), "The backup repeats a photo identifier.");
+          photos.set(photo.portableId, photo);
+        }
+
+        const checkinIds = new Set();
+        for (const entry of backup.checkins) {
+          requireBackup(
+            isBackupId(entry?.portableId) && Number.isSafeInteger(entry.sourceId) && entry.sourceId > 0 &&
+            isFace(entry.face) && isSavedTimestamp(entry.timestamp),
+            "The backup contains an invalid check-in."
+          );
+          requireBackup(!checkinIds.has(entry.portableId), "The backup repeats a check-in identifier.");
+          checkinIds.add(entry.portableId);
+          requireBackup(
+            entry.audio === null ? entry.audioType === null :
+              entry.audio && entry.face === "sad" && (entry.audioType === null || isAudioType(entry.audioType)),
+            "The backup contains an invalid recording entry."
+          );
+          if (Object.hasOwn(entry, "photoId") && entry.photoId !== null) {
+            requireBackup(
+              photos.get(entry.photoId)?.face === entry.face,
+              "A check-in refers to a missing or mismatched photo."
+            );
+          }
+        }
+
+        const currentFaces = new Set();
+        for (const photo of backup.currentPhotos) {
+          requireBackup(
+            isFace(photo?.face) && photos.get(photo.photoId)?.face === photo.face &&
+            isSavedTimestamp(photo.updatedAt) && !currentFaces.has(photo.face),
+            "The backup contains an invalid current face photo."
+          );
+          currentFaces.add(photo.face);
+        }
+      }
+
+      function checkMediaBudget(size, budget) {
+        requireBackup(
+          Number.isSafeInteger(size) && size > 0 && size <= MAX_BACKUP_ITEM_BYTES,
+          "A recording or photo is empty or exceeds the 2 MiB limit."
+        );
+        budget.total += size;
+        requireBackup(budget.total <= MAX_BACKUP_MEDIA_BYTES, "Backup media exceeds the 12 MiB limit.");
+      }
+
+      async function mediaDigest(bytes) {
+        const digest = await crypto.subtle.digest("SHA-256", bytes);
+        return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      }
+
+      function validateMediaHeader(bytes, type) {
+        const startsWith = (...signature) => signature.every((byte, index) => bytes[index] === byte);
+        const mime = type.toLowerCase().split(";")[0];
+        const checks = {
+          "image/jpeg": () => startsWith(0xff, 0xd8, 0xff),
+          "image/png": () => startsWith(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a),
+          "audio/mp4": () => String.fromCharCode(...bytes.subarray(4, 8)) === "ftyp",
+          "audio/webm": () => startsWith(0x1a, 0x45, 0xdf, 0xa3),
+          "audio/ogg": () => startsWith(0x4f, 0x67, 0x67, 0x53),
+          "audio/wav": () => startsWith(0x52, 0x49, 0x46, 0x46) &&
+            String.fromCharCode(...bytes.subarray(8, 12)) === "WAVE"
+        };
+        const check = checks[mime.replace(/^video\//, "audio/")];
+        requireBackup(!check || check(), "A recording or photo does not match its file type.");
+      }
+
+      async function encodeMedia(blob, kind, budget) {
+        requireBackup(blob instanceof Blob && isMediaType(blob.type, kind), "A saved file has an invalid media type.");
+        checkMediaBudget(blob.size, budget);
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        validateMediaHeader(bytes, blob.type);
+        let binary = "";
+        for (let offset = 0; offset < bytes.length; offset += 8192) {
+          binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
+        }
+        return { type: blob.type, size: blob.size, sha256: await mediaDigest(bytes), data: btoa(binary) };
+      }
+
+      async function decodeMedia(media, kind, budget, declaredType = null) {
+        requireBackup(isMediaType(media?.type, kind), "A recording or photo has an invalid media type.");
+        checkMediaBudget(media.size, budget);
+        requireBackup(
+          typeof media.data === "string" && media.data.length === Math.ceil(media.size / 3) * 4 &&
+          typeof media.sha256 === "string" && /^[a-f0-9]{64}$/.test(media.sha256),
+          "A recording or photo is missing or damaged."
+        );
+        let binary;
+        try {
+          binary = atob(media.data);
+        } catch {
+          throw new BackupError("A recording or photo could not be decoded.");
+        }
+        requireBackup(binary.length === media.size && btoa(binary) === media.data, "A recording or photo is damaged.");
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        requireBackup(await mediaDigest(bytes) === media.sha256, "A recording or photo failed its integrity check.");
+        validateMediaHeader(bytes, media.type || declaredType || "");
+        return { blob: new Blob([bytes], { type: media.type }), sha256: media.sha256 };
+      }
+
+      // All three reads belong to the same transaction. The callback runs in
+      // the final request event so it can still enqueue writes during restore.
+      function withBackupSnapshot(database, mode, useSnapshot) {
+        return new Promise((resolve, reject) => {
+          const availableStores = BACKUP_STORES.filter((name) => database.objectStoreNames.contains(name));
+          if (!availableStores.includes(CHECKINS_STORE_NAME) ||
+            (database.version >= 2 && !availableStores.includes(FACE_IMAGES_STORE_NAME)) ||
+            (database.version >= 3 && availableStores.length !== BACKUP_STORES.length)) {
+            throw new BackupError("The saved data uses an unsupported database layout.");
+          }
+          const transaction = database.transaction(availableStores, mode);
+          const snapshot = { checkins: [], faceImageVersions: [], faceImages: [] };
+          let completedReads = 0;
+          let result;
+          let operationError;
+
+          transaction.oncomplete = () => resolve(result);
+          transaction.onabort = () => reject(operationError || transaction.error || new Error("Backup transaction aborted"));
+
+          function abortWith(error) {
+            operationError = error;
+            transaction.abort();
+          }
+
+          for (const storeName of availableStores) {
+            const request = transaction.objectStore(storeName).getAll();
+            request.onsuccess = () => {
+              snapshot[storeName] = request.result;
+              completedReads += 1;
+              if (completedReads !== availableStores.length) return;
+              try {
+                result = useSnapshot(snapshot, transaction, abortWith);
+              } catch (error) {
+                abortWith(error);
+              }
+            };
+          }
+        });
+      }
+
+      function readBackupSnapshot(database) {
+        return withBackupSnapshot(database, "readonly", (snapshot) => snapshot);
+      }
+
+      async function buildBackupFile(snapshot, recoveryOnly = false) {
+        requireBackup(snapshot.checkins.length <= MAX_BACKUP_ROWS, "This backup has too many check-ins.");
+        const versions = new Map(snapshot.faceImageVersions.map((photo) => [photo.id, photo]));
+        const backup = {
+          format: BACKUP_FORMAT,
+          version: BACKUP_VERSION,
+          exportedAt: new Date().toISOString(),
+          checkins: [],
+          photoVersions: [],
+          currentPhotos: []
+        };
+        if (recoveryOnly) backup.recoveryOnly = true;
+
+        // The archive contains photos in use now or in a check-in. Each photo
+        // version is included once even if many check-ins reference it.
+        const referencedVersions = new Set();
+        const budget = { total: 0 };
+        function portablePhotoId(id) {
+          const photo = versions.get(id);
+          requireBackup(photo, "A saved face photo could not be found. The backup was not prepared.");
+          referencedVersions.add(photo);
+          return photo.portableId;
+        }
+
+        for (const record of snapshot.checkins) {
+          const entry = {
+            portableId: record.portableId,
+            sourceId: record.sourceId ?? record.id,
+            face: record.face,
+            timestamp: record.timestamp,
+            audioType: record.audioType,
+            audio: record.audio === null ? null : await encodeMedia(record.audio, "audio", budget)
+          };
+          if (Object.hasOwn(record, "faceImageVersionId")) {
+            entry.photoId = record.faceImageVersionId === null ? null : portablePhotoId(record.faceImageVersionId);
+          }
+          backup.checkins.push(entry);
+        }
+        for (const photo of snapshot.faceImages) {
+          backup.currentPhotos.push({
+            face: photo.face,
+            updatedAt: photo.updatedAt,
+            photoId: portablePhotoId(photo.versionId)
+          });
+        }
+        for (const photo of referencedVersions) {
+          backup.photoVersions.push({
+            portableId: photo.portableId,
+            face: photo.face,
+            createdAt: photo.createdAt,
+            image: await encodeMedia(photo.image, "photo", budget)
+          });
+        }
+        validateBackupRecords(backup);
+        const file = new File(
+          [JSON.stringify(backup)], "feelings-checkin-" + backup.exportedAt.slice(0, 10) + ".json",
+          { type: "application/json" }
+        );
+        requireBackup(file.size <= MAX_BACKUP_FILE_BYTES, "The backup exceeds the 20 MiB file limit.");
+        return file;
+      }
+
+      async function readBackupFile(file) {
+        requireBackup(file.size <= MAX_BACKUP_FILE_BYTES, "This file exceeds the 20 MiB backup limit.");
+        let backup;
+        try {
+          backup = JSON.parse(await file.text());
+        } catch {
+          throw new BackupError("This file could not be read as a Feelings Check-in backup.");
+        }
+        validateBackupRecords(backup);
+
+        const budget = { total: 0 };
+        for (const entry of backup.checkins) {
+          if (entry.audio) entry.audio = await decodeMedia(entry.audio, "audio", budget, entry.audioType);
+        }
+        for (const photo of backup.photoVersions) {
+          photo.image = await decodeMedia(photo.image, "photo", budget);
+        }
+        return backup;
+      }
+
+      async function mediaMatches(saved, incoming) {
+        if (incoming === null) return saved === null;
+        return saved instanceof Blob && saved.size === incoming.blob.size && saved.type === incoming.blob.type &&
+          await mediaDigest(await saved.arrayBuffer()) === incoming.sha256;
+      }
+
+      async function previewRestore(database, backup) {
+        const snapshot = await readBackupSnapshot(database);
+        const isEmpty = BACKUP_STORES.every((store) => snapshot[store].length === 0);
+        const plan = {
+          snapshot,
+          newCheckins: [],
+          newPhotos: [],
+          currentPhotos: isEmpty ? backup.currentPhotos : [],
+          keepCurrentPhotos: !isEmpty && backup.currentPhotos.length > 0,
+          skipped: 0,
+          checkinConflicts: 0,
+          photoConflicts: 0
+        };
+        const photosByKey = new Map(snapshot.faceImageVersions.map((photo) => [photo.id, photo.portableId]));
+        const photosById = new Map(snapshot.faceImageVersions.map((photo) => [photo.portableId, photo]));
+        const checkinsById = new Map(snapshot.checkins.map((record) => [record.portableId, record]));
+
+        for (const photo of backup.photoVersions) {
+          const saved = photosById.get(photo.portableId);
+          if (!saved) {
+            plan.newPhotos.push(photo);
+          } else if (saved.face !== photo.face || saved.createdAt !== photo.createdAt ||
+            !await mediaMatches(saved.image, photo.image)) {
+            plan.photoConflicts += 1;
+          }
+        }
+        for (const entry of backup.checkins) {
+          const saved = checkinsById.get(entry.portableId);
+          if (!saved) {
+            plan.newCheckins.push(entry);
+            continue;
+          }
+          const savedPhotoId = saved.faceImageVersionId == null ?
+            saved.faceImageVersionId : photosByKey.get(saved.faceImageVersionId);
+          if ((saved.sourceId ?? saved.id) === entry.sourceId && saved.face === entry.face &&
+            saved.timestamp === entry.timestamp && saved.audioType === entry.audioType &&
+            Object.hasOwn(saved, "faceImageVersionId") === Object.hasOwn(entry, "photoId") &&
+            savedPhotoId === entry.photoId && await mediaMatches(saved.audio, entry.audio)) {
+            plan.skipped += 1;
+          } else {
+            plan.checkinConflicts += 1;
+          }
+        }
+        requireBackup(
+          !backup.recoveryOnly || isEmpty || (!plan.newCheckins.length && !plan.newPhotos.length),
+          "A pre-upgrade recovery copy can only be restored into an empty database."
+        );
+        return plan;
+      }
+
+      function snapshotStillCurrent(previous, current) {
+        function rowsMatch(store, equal) {
+          return previous[store].length === current[store].length &&
+            previous[store].every((row, index) => equal(row, current[store][index]));
+        }
+        // Check-ins change revision when audio is attached. Photo versions
+        // are immutable and current settings point to a new version on edit.
+        return rowsMatch(CHECKINS_STORE_NAME, (a, b) => a.id === b.id &&
+          a.portableId === b.portableId && a.revision === b.revision) &&
+          rowsMatch(FACE_IMAGE_VERSIONS_STORE_NAME, (a, b) => a.id === b.id && a.portableId === b.portableId) &&
+          rowsMatch(FACE_IMAGES_STORE_NAME, (a, b) => a.face === b.face && a.versionId === b.versionId);
+      }
+
+      function commitRestore(database, plan) {
+        return withBackupSnapshot(database, "readwrite", (current, transaction, abortWith) => {
+          if (!snapshotStillCurrent(plan.snapshot, current)) {
+            throw new BackupError("The log changed. Review the updated restore preview.", "changed");
+          }
+          const checkins = transaction.objectStore(CHECKINS_STORE_NAME);
+          const versions = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME);
+          const settings = transaction.objectStore(FACE_IMAGES_STORE_NAME);
+          const photos = new Map(current.faceImageVersions.map((photo) => [photo.portableId, photo]));
+
+          function addCheckinsAndSettings() {
+            for (const entry of plan.newCheckins) {
+              const record = {
+                portableId: entry.portableId,
+                sourceId: entry.sourceId,
+                face: entry.face,
+                timestamp: entry.timestamp,
+                audioType: entry.audioType,
+                audio: entry.audio?.blob ?? null,
+                revision: 0
+              };
+              if (Object.hasOwn(entry, "photoId")) {
+                record.faceImageVersionId = entry.photoId === null ? null : photos.get(entry.photoId).id;
+              }
+              checkins.add(record);
+            }
+            for (const setting of plan.currentPhotos) {
+              const photo = photos.get(setting.photoId);
+              settings.add({ face: setting.face, updatedAt: setting.updatedAt, versionId: photo.id, image: photo.image });
+            }
+          }
+
+          let remainingPhotos = plan.newPhotos.length;
+          if (!remainingPhotos) addCheckinsAndSettings();
+          for (const photo of plan.newPhotos) {
+            const record = {
+              portableId: photo.portableId, face: photo.face, createdAt: photo.createdAt, image: photo.image.blob
+            };
+            const request = versions.add(record);
+            request.onsuccess = () => {
+              photos.set(photo.portableId, { ...record, id: request.result });
+              remainingPhotos -= 1;
+              if (remainingPhotos !== 0) return;
+              try {
+                addCheckinsAndSettings();
+              } catch (error) {
+                abortWith(error);
+              }
+            };
+          }
+        });
+      }
+
+      function openDatabaseForRecovery() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(DATABASE_NAME);
+          request.onupgradeneeded = () => {
+            // Opening a missing database would otherwise create one. Recovery
+            // reads an existing database with the version it already has.
+            request.transaction.abort();
+          };
+          request.onerror = () => reject(new BackupError("No existing check-in database could be opened in this browser."));
+          request.onsuccess = () => resolve(request.result);
+        });
+      }
+
+      function isRecoveryView() {
+        return window.location.pathname.endsWith("/recovery.html") || window.location.hash === "#recovery";
+      }
+
+      async function prepareRecoveryBackup() {
+        const database = await openDatabaseForRecovery();
+        const version = database.version;
+        let snapshot;
+        try {
+          requireBackup(version <= DATABASE_VERSION, "The existing database version is unsupported.");
+          snapshot = await readBackupSnapshot(database);
+        } finally {
+          database.close();
+        }
+        if (version === DATABASE_VERSION) return buildBackupFile(snapshot);
+
+        for (const record of snapshot.checkins) record.portableId = crypto.randomUUID();
+        for (const photo of snapshot.faceImageVersions) photo.portableId = crypto.randomUUID();
+        // Version 2 saved only the current images. Make references inside
+        // the file without migrating the on-device records.
+        if (version === 2) {
+          for (const photo of snapshot.faceImages) {
+            photo.versionId = snapshot.faceImageVersions.length + 1;
+            snapshot.faceImageVersions.push({
+              id: photo.versionId,
+              portableId: crypto.randomUUID(),
+              face: photo.face,
+              createdAt: photo.updatedAt,
+              image: photo.image
+            });
+          }
+        }
+        return buildBackupFile(snapshot, true);
+      }
+
+      function clearPreparedBackup() {
+        if (backupDownloadUrl) URL.revokeObjectURL(backupDownloadUrl);
+        backupDownloadUrl = null;
+        preparedBackupFile = null;
+        downloadBackupLink.removeAttribute("href");
+        backupSaveActions.hidden = true;
+      }
+
+      function setBackupBusy(busy) {
+        backupBusy = busy;
+        exportBackupButton.disabled = busy;
+        chooseBackupButton.disabled = busy;
+        confirmRestoreButton.disabled = busy;
+        cancelRestoreButton.disabled = busy;
+        shareBackupButton.disabled = busy;
+      }
+
+      function clearRestorePreview() {
+        pendingRestore = null;
+        restoreActions.hidden = true;
+      }
+
+      function showBackupError(error, fallback) {
+        if (error instanceof BackupError) {
+          backupStatus.textContent = error.message;
+        } else if (error.name === "QuotaExceededError") {
+          backupStatus.textContent = "There is not enough space in browser storage for this restore.";
+        } else if (error.code === "database-blocked") {
+          backupStatus.textContent = "Close the other Feelings Check-in tabs and try again.";
+        } else {
+          backupStatus.textContent = fallback;
+        }
+      }
+
+      async function handleExportBackup() {
+        if (backupBusy) return;
+        const view = backupViewVersion;
+        const recovery = isRecoveryView();
+        clearRestorePreview();
+        clearPreparedBackup();
+        setBackupBusy(true);
+        backupStatus.textContent = "Preparing your backup…";
+        try {
+          const file = recovery ? await prepareRecoveryBackup() : await buildBackupFile(
+            await readBackupSnapshot(await finishWithin(openDatabase(), "Opening storage"))
+          );
+          if (view !== backupViewVersion) return;
+          preparedBackupFile = file;
+          backupDownloadUrl = URL.createObjectURL(file);
+          downloadBackupLink.href = backupDownloadUrl;
+          downloadBackupLink.download = file.name;
+          shareBackupButton.hidden = !navigator.canShare?.({ files: [file] });
+          backupSaveActions.hidden = false;
+          backupStatus.textContent = "Backup ready. Choose how to save it, then check that the file opens.";
+        } catch (error) {
+          if (view === backupViewVersion) showBackupError(error, "Could not prepare a backup. Try again.");
+        } finally {
+          setBackupBusy(false);
+        }
+      }
+
+      async function handleShareBackup() {
+        if (backupBusy || !preparedBackupFile) return;
+        const view = backupViewVersion;
+        setBackupBusy(true);
+        try {
+          // This runs on a fresh tap. A file prepared asynchronously during
+          // this handler could outlast Safari's required user activation.
+          await navigator.share({ files: [preparedBackupFile] });
+          if (view === backupViewVersion) {
+            backupStatus.textContent = "Backup handed to your device. Check Files to verify it was saved.";
+          }
+        } catch (error) {
+          if (view === backupViewVersion) {
+            backupStatus.textContent = error.name === "AbortError" ?
+              "Save options closed. You can open them again." : "Could not open save options. Try downloading instead.";
+          }
+        } finally {
+          setBackupBusy(false);
+        }
+      }
+
+      function showRestorePreview(backup, plan, changed = false) {
+        const counts = plan.newCheckins.length + " check-ins to add. " + plan.skipped +
+          " already present. " + plan.checkinConflicts + " check-in conflicts. " +
+          plan.photoConflicts + " photo conflicts.";
+        let message = changed ? "The log changed. Review these updated counts. " + counts : counts;
+        if (plan.keepCurrentPhotos) message += " The face settings on this device will stay in use.";
+        if (plan.checkinConflicts || plan.photoConflicts) {
+          clearRestorePreview();
+          backupStatus.textContent = message + " Restore stopped. Your saved data is unchanged.";
+          return;
+        }
+        pendingRestore = { backup, plan };
+        restoreActions.hidden = false;
+        backupStatus.textContent = message + " Confirm to restore.";
+      }
+
+      async function handleBackupFile() {
+        const file = backupFile.files?.[0];
+        backupFile.value = "";
+        if (backupBusy || isRecoveryView() || !file) return;
+        const view = backupViewVersion;
+        clearRestorePreview();
+        clearPreparedBackup();
+        setBackupBusy(true);
+        backupStatus.textContent = "Checking the backup…";
+        try {
+          const backup = await readBackupFile(file);
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          const plan = await previewRestore(database, backup);
+          if (view === backupViewVersion) showRestorePreview(backup, plan);
+        } catch (error) {
+          if (view === backupViewVersion) showBackupError(error, "Could not read the backup. Your saved data is unchanged.");
+        } finally {
+          setBackupBusy(false);
+          if (pendingRestore && view === backupViewVersion) confirmRestoreButton.focus();
+        }
+      }
+
+      async function handleConfirmRestore() {
+        if (backupBusy || !pendingRestore) return;
+        const view = backupViewVersion;
+        const { backup, plan } = pendingRestore;
+        clearRestorePreview();
+        setBackupBusy(true);
+        backupStatus.textContent = "Restoring your backup…";
+        try {
+          const database = await finishWithin(openDatabase(), "Opening storage");
+          try {
+            await commitRestore(database, plan);
+          } catch (error) {
+            if (error.code !== "changed") throw error;
+            const updated = await previewRestore(database, backup);
+            if (view === backupViewVersion) showRestorePreview(backup, updated, true);
+            return;
+          }
+          if (view === backupViewVersion) {
+            backupStatus.textContent = "Restore complete. " + plan.newCheckins.length +
+              " check-ins added. " + plan.skipped + " already present. 0 conflicts.";
+          }
+          if (plan.currentPhotos.length) faceImagesReady = loadSavedFaceImages();
+          if (window.location.hash === "#log") void renderLog();
+        } catch (error) {
+          if (view === backupViewVersion) showBackupError(error, "Could not restore the backup. Your saved data is unchanged.");
+        } finally {
+          setBackupBusy(false);
+          if (pendingRestore && view === backupViewVersion) confirmRestoreButton.focus();
+        }
+      }
+
+      function displayFaceImage(face, image, versionId = null) {
+        const oldUrl = faceImageUrls.get(face);
+        const photoElements = document.querySelectorAll(`[data-face-photo="${face}"]`);
+        const fallbackElements = document.querySelectorAll(`[data-face-fallback="${face}"]`);
+        const resetButton = resetFaceButtons.find((button) => button.dataset.resetFace === face);
+
+        photoElements.forEach((element) => {
+          element.hidden = true;
+          element.removeAttribute("src");
+        });
+        if (oldUrl) {
+          URL.revokeObjectURL(oldUrl);
+          faceImageUrls.delete(face);
+        }
+        faceImageVersionIds.delete(face);
+
+        if (image instanceof Blob && image.size > 0) {
+          // One object URL can feed both the child button and setup preview.
+          // It points at the local Blob; it does not make a network request.
+          const url = URL.createObjectURL(image);
+          faceImageUrls.set(face, url);
+          if (versionId !== null && versionId !== undefined) {
+            faceImageVersionIds.set(face, versionId);
+          }
+          photoElements.forEach((element) => {
+            element.src = url;
+            element.hidden = false;
+          });
+          fallbackElements.forEach((element) => {
+            element.hidden = true;
+          });
+          if (resetButton) resetButton.disabled = false;
+          return;
+        }
+
+        fallbackElements.forEach((element) => {
+          element.hidden = false;
+        });
+        if (resetButton) resetButton.disabled = true;
+      }
+
+      async function loadSavedFaceImages() {
+        const records = await getFaceImages();
+        records.forEach((record) => {
+          if (FACE_LABELS[record.face] && record.image instanceof Blob) {
+            displayFaceImage(record.face, record.image, record.versionId);
+          }
+        });
+      }
+
+      async function prepareFaceImage(file) {
+        // Some iOS camera and Photos picker results omit the MIME type. Let the
+        // browser attempt to decode those files instead of rejecting them early.
+        if (file.type && !file.type.startsWith("image/")) {
+          throw new Error("The selected file is not an image");
+        }
+
+        const sourceUrl = URL.createObjectURL(file);
+        try {
+          const sourceImage = new Image();
+          sourceImage.decoding = "async";
+          await finishWithin(
+            new Promise((resolve, reject) => {
+              sourceImage.onload = resolve;
+              sourceImage.onerror = () => reject(new Error("The selected image could not be opened"));
+              sourceImage.src = sourceUrl;
+            }),
+            "Opening the selected photo",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
+
+          if (!sourceImage.naturalWidth || !sourceImage.naturalHeight) {
+            throw new Error("The selected image has no usable dimensions");
+          }
+
+          // Center-cropping keeps all three buttons consistent. Resizing to at
+          // most 720px avoids filling Safari's storage with full camera photos.
+          // Re-encoding also strips camera metadata such as GPS coordinates.
+          const sourceSide = Math.min(sourceImage.naturalWidth, sourceImage.naturalHeight);
+          const outputSize = Math.min(720, sourceSide);
+          const sourceX = (sourceImage.naturalWidth - sourceSide) / 2;
+          const sourceY = (sourceImage.naturalHeight - sourceSide) / 2;
+          const canvas = document.createElement("canvas");
+          canvas.width = outputSize;
+          canvas.height = outputSize;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Image resizing is unavailable");
+
+          context.fillStyle = "#fff8ed";
+          context.fillRect(0, 0, outputSize, outputSize);
+          context.drawImage(
+            sourceImage,
+            sourceX,
+            sourceY,
+            sourceSide,
+            sourceSide,
+            0,
+            0,
+            outputSize,
+            outputSize
+          );
+
+          return await finishWithin(
+            new Promise((resolve, reject) => {
+              canvas.toBlob((blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error("The resized image could not be created"));
+              }, "image/jpeg", 0.86);
+            }),
+            "Preparing the selected photo",
+            PHOTO_STORAGE_TIMEOUT_MS
+          );
+        } finally {
+          URL.revokeObjectURL(sourceUrl);
+        }
+      }
+
+      async function handleFaceImageChange(event) {
+        const input = event.currentTarget;
+        const face = input.dataset.faceImageInput;
+        const file = input.files && input.files[0];
+        input.value = "";
+        if (!file || !FACE_LABELS[face]) return;
+
+        input.disabled = true;
+        faceSetupStatus.textContent = `Preparing ${FACE_LABELS[face].toLowerCase()} photo…`;
+
+        try {
+          await faceImagesReady;
+          const image = await prepareFaceImage(file);
+          faceSetupStatus.textContent = `Saving ${FACE_LABELS[face].toLowerCase()} photo…`;
+          const versionId = await saveFaceImage(face, image);
+          if (versionId === null) {
+            faceSetupStatus.textContent = faceImageSaveMessage(lastFaceImageSaveError);
+            return;
+          }
+
+          displayFaceImage(face, image, versionId);
+          faceSetupStatus.textContent = `${FACE_LABELS[face]} photo saved on this device.`;
+        } catch (error) {
+          logError("The selected face photo could not be prepared.", error);
+          faceSetupStatus.textContent = "That photo couldn’t be used. Please try another.";
+        } finally {
+          input.disabled = false;
+        }
+      }
+
+      async function handleResetFace(event) {
+        const button = event.currentTarget;
+        const face = button.dataset.resetFace;
+        if (!FACE_LABELS[face]) return;
+
+        button.disabled = true;
+        faceSetupStatus.textContent = `Restoring the ${FACE_LABELS[face].toLowerCase()} emoji…`;
+        await faceImagesReady;
+        const wasRemoved = await removeFaceImage(face);
+
+        if (wasRemoved) {
+          displayFaceImage(face, null);
+          faceSetupStatus.textContent = `${FACE_LABELS[face]} now uses the emoji.`;
+        } else {
+          button.disabled = false;
+          faceSetupStatus.textContent = "That photo couldn’t be reset. Please try again.";
+        }
+      }
+
+      function primeSpeechForSadPrompt() {
+        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+          return false;
+        }
+
+        try {
+          const speech = window.speechSynthesis;
+          speech.cancel();
+          speech.resume();
+
+          // iOS Safari may reject speech first requested after an await because
+          // the original tap's temporary user activation has expired. Speaking
+          // an inaudible utterance synchronously inside the tap handler primes
+          // the engine. The real words are still spoken only after the sad
+          // check-in's IndexedDB save attempt has finished.
+          const primer = new SpeechSynthesisUtterance("ready");
+          primer.volume = 0;
+          primer.rate = 2;
+          speech.speak(primer);
+          return true;
+        } catch (error) {
+          logError("Speech synthesis could not be prepared.", error);
+          return false;
+        }
+      }
+
+      function speakSadPrompt(speechWasPrimed) {
+        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+          return;
+        }
+
+        try {
+          const speech = window.speechSynthesis;
+          const prompt = new SpeechSynthesisUtterance("Tell us why you're sad");
+          prompt.rate = 0.92;
+          prompt.pitch = 1.04;
+
+          // Cancel any unfinished silent primer. resume() also clears an iOS
+          // Safari state where speech can remain paused after an interruption.
+          if (speechWasPrimed) speech.cancel();
+          speech.resume();
+          speech.speak(prompt);
+        } catch (error) {
+          // The text remains visible, which is the required fallback.
+          logError("The sad prompt could not be spoken.", error);
+        }
+      }
+
+      function cancelSpeech() {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+      }
+
+      function showOnly(panel) {
+        checkinPanel.hidden = panel !== checkinPanel;
+        voicePanel.hidden = panel !== voicePanel;
+        thanksPanel.hidden = panel !== thanksPanel;
+      }
+
+      function showImmediateResponse(selectedButton) {
+        faceButtons.forEach((button) => {
+          button.disabled = true;
+          button.classList.toggle("is-selected", button === selectedButton);
+        });
+        tapResponse.textContent = "Thanks for telling me!";
+        tapResponse.classList.add("is-visible");
+      }
+
+      function resetRecordingControls() {
+        voiceChoiceLocked = false;
+        recordButton.disabled = false;
+        recordButton.setAttribute("aria-label", "Record a voice clip");
+        recordButtonText.textContent = "Record";
+        noThanksButton.disabled = false;
+        listeningIndicator.classList.remove("is-visible");
+      }
+
+      function showFaceScreen() {
+        faceInteraction += 1;
+        window.clearTimeout(resetTimer);
+        cancelSpeech();
+        currentSadCheckInId = null;
+        faceTapLocked = false;
+        tapResponse.textContent = "";
+        tapResponse.classList.remove("is-visible");
+        faceButtons.forEach((button) => {
+          button.disabled = false;
+          button.classList.remove("is-selected");
+        });
+        resetRecordingControls();
+        showOnly(checkinPanel);
+      }
+
+      function showVoiceChoices() {
+        resetRecordingControls();
+        showOnly(voicePanel);
+      }
+
+      function showThanksThenReset() {
+        cancelSpeech();
+        showOnly(thanksPanel);
+        window.clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(showFaceScreen, THANK_YOU_DURATION_MS);
+      }
+
+      async function handleFaceTap(event) {
+        if (faceTapLocked) return;
+
+        faceTapLocked = true;
+        const interaction = faceInteraction;
+        const selectedButton = event.currentTarget;
+        const face = selectedButton.dataset.face;
+        const timestamp = new Date().toISOString();
+        const responseStartedAt = performance.now();
+
+        // This DOM update happens synchronously, before any storage work, so the
+        // child always receives an immediate response to the tap.
+        showImmediateResponse(selectedButton);
+
+        // Prime speech during the original sad tap. The real prompt is delayed
+        // until after the save attempt below, preserving the required ordering.
+        const speechWasPrimed = face === "sad" ? primeSpeechForSadPrompt() : false;
+
+        // Loading is normally complete before a tap. Awaiting it here handles a
+        // very fast first tap while keeping the visual response above instant.
+        // The saved version id freezes the exact photo used for this check-in.
+        await faceImagesReady;
+        const faceImageVersionId = faceImageVersionIds.get(face) || null;
+        const checkInId = await saveCheckIn(face, timestamp, faceImageVersionId);
+        if (interaction !== faceInteraction) return;
+
+        if (face === "sad") {
+          if (checkInId === null) {
+            showThanksThenReset();
+            return;
+          }
+          currentSadCheckInId = checkInId;
+          showVoiceChoices();
+          speakSadPrompt(speechWasPrimed);
+          return;
+        }
+
+        const elapsed = performance.now() - responseStartedAt;
+        await wait(Math.max(0, THANK_YOU_DURATION_MS - elapsed));
+        if (interaction === faceInteraction) showFaceScreen();
+      }
+
+      function preferredAudioType() {
+        // Safari on iOS normally selects MP4. Other candidates keep local
+        // desktop testing useful without assuming every browser records WebM.
+        const candidates = [
+          "audio/mp4",
+          "audio/mp4;codecs=mp4a.40.2",
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/ogg;codecs=opus"
+        ];
+
+        return candidates.find((type) => window.MediaRecorder.isTypeSupported(type)) || "";
+      }
+
+      function releaseMicrophone(stream) {
+        if (!stream) return;
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
+      function createRecorder(stream, audioType) {
+        if (!audioType) return new MediaRecorder(stream);
+
+        try {
+          return new MediaRecorder(stream, { mimeType: audioType });
+        } catch (error) {
+          // A browser can occasionally claim support but reject the explicit
+          // option. Its default is safer than losing the recording completely.
+          logError("The preferred audio type could not be used; using the browser default.", error);
+          return new MediaRecorder(stream);
+        }
+      }
+
+      async function completeRecording(session, shouldAttachAudio) {
+        if (session.finalized) return;
+        session.finalized = true;
+        window.clearTimeout(session.stopTimer);
+        releaseMicrophone(session.stream);
+        activeRecording = null;
+        listeningIndicator.classList.remove("is-visible");
+
+        if (shouldAttachAudio && session.chunks.length > 0) {
+          const audioType = session.recorder.mimeType || session.audioType || session.chunks[0].type || "";
+          const audio = new Blob(session.chunks, audioType ? { type: audioType } : undefined);
+
+          if (audio.size > 0) {
+            await attachAudio(session.checkInId, audio, audioType || null);
+          } else {
+            logError("The recorded voice clip was empty.", new Error("Empty audio Blob"));
+          }
+        } else if (shouldAttachAudio) {
+          logError("The recorder returned no audio data.", new Error("No MediaRecorder chunks"));
+        }
+
+        if (session.interaction === faceInteraction) showThanksThenReset();
+      }
+
+      function cancelRecording() {
+        const session = activeRecording;
+        if (!session) return;
+        activeRecording = null;
+        session.finalized = true;
+        window.clearTimeout(session.stopTimer);
+        try {
+          if (session.recorder.state !== "inactive") session.recorder.stop();
+        } catch (error) {
+          logError("Recording could not be cancelled normally.", error);
+        } finally {
+          releaseMicrophone(session.stream);
+        }
+      }
+
+      function requestRecordingStop() {
+        const session = activeRecording;
+        if (!session || session.finalized) return;
+
+        window.clearTimeout(session.stopTimer);
+        recordButton.disabled = true;
+        listeningIndicator.classList.remove("is-visible");
+
+        try {
+          if (session.recorder.state !== "inactive") {
+            session.recorder.stop();
+            // Stop every track immediately after requesting the final chunk so
+            // iOS releases the orange microphone indicator without delay.
+            releaseMicrophone(session.stream);
+          } else {
+            void completeRecording(session, true);
+          }
+        } catch (error) {
+          logError("Recording could not be stopped normally.", error);
+          releaseMicrophone(session.stream);
+          void completeRecording(session, false);
+        }
+      }
+
+      async function startRecording() {
+        if (voiceChoiceLocked) return;
+        voiceChoiceLocked = true;
+        const interaction = faceInteraction;
+        const checkInId = currentSadCheckInId;
+        recordButton.disabled = true;
+        noThanksButton.disabled = true;
+        cancelSpeech();
+
+        let stream = null;
+        try {
+          if (!("mediaDevices" in navigator) || !("getUserMedia" in navigator.mediaDevices)) {
+            throw new Error("Microphone access is unavailable");
+          }
+          if (!("MediaRecorder" in window)) {
+            throw new Error("MediaRecorder is unavailable");
+          }
+
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          if (interaction !== faceInteraction) {
+            releaseMicrophone(stream);
+            return;
+          }
+          const audioType = preferredAudioType();
+          const recorder = createRecorder(stream, audioType);
+          const session = {
+            recorder,
+            stream,
+            audioType,
+            interaction,
+            checkInId,
+            chunks: [],
+            stopTimer: null,
+            finalized: false
+          };
+
+          activeRecording = session;
+
+          recorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+              session.chunks.push(event.data);
+            }
+          };
+
+          recorder.onstop = () => {
+            void completeRecording(session, true);
+          };
+
+          recorder.onerror = (event) => {
+            logError("MediaRecorder reported an error.", event.error || event);
+            releaseMicrophone(session.stream);
+            void completeRecording(session, false);
+          };
+
+          recorder.start();
+          recordButton.disabled = false;
+          recordButton.setAttribute("aria-label", "Stop recording");
+          recordButtonText.textContent = "Stop";
+          listeningIndicator.classList.add("is-visible");
+
+          // The ten-second limit is intentionally invisible. It limits stored
+          // audio without giving the child a countdown or time pressure.
+          session.stopTimer = window.setTimeout(requestRecordingStop, RECORDING_LIMIT_MS);
+        } catch (error) {
+          releaseMicrophone(stream);
+          if (interaction !== faceInteraction) return;
+          cancelRecording();
+          logError("Microphone permission was denied or recording could not start.", error);
+          showThanksThenReset();
+        }
+      }
+
+      function handleRecordButton() {
+        if (activeRecording && activeRecording.recorder.state === "recording") {
+          requestRecordingStop();
+          return;
+        }
+        void startRecording();
+      }
+
+      function handleNoThanks() {
+        if (voiceChoiceLocked) return;
+        voiceChoiceLocked = true;
+        recordButton.disabled = true;
+        noThanksButton.disabled = true;
+        showThanksThenReset();
+      }
+
+      function localDayKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function cleanUpAudioPlayers() {
+        audioPlayers.forEach(({ audio, url }) => {
+          audio.pause();
+          URL.revokeObjectURL(url);
+        });
+        audioPlayers = [];
+      }
+
+      function cleanUpLogFaceImages() {
+        logFaceImageUrls.forEach((url) => URL.revokeObjectURL(url));
+        logFaceImageUrls.clear();
+      }
+
+      function getLogFaceImageUrl(record, versionsById) {
+        const hasSavedPhotoVersion = Object.prototype.hasOwnProperty.call(
+          record,
+          "faceImageVersionId"
+        );
+
+        if (hasSavedPhotoVersion) {
+          // null means the emoji was active at check-in time. If a referenced
+          // Blob is missing, the honest fallback is also the emoji—not a newer
+          // photo that would rewrite history.
+          if (record.faceImageVersionId === null) return null;
+          const version = versionsById.get(record.faceImageVersionId);
+          if (!version || !(version.image instanceof Blob) || version.image.size === 0) {
+            return null;
+          }
+
+          if (!logFaceImageUrls.has(version.id)) {
+            logFaceImageUrls.set(version.id, URL.createObjectURL(version.image));
+          }
+          return logFaceImageUrls.get(version.id);
+        }
+
+        // Records saved before photo versioning contain no historical link.
+        // Continue showing the current photo for those legacy rows because the
+        // exact photo active at their check-in time cannot be reconstructed.
+        return faceImageUrls.get(record.face) || null;
+      }
+
+      function makePlayButton(record) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "play-button";
+        button.textContent = "▶ Play";
+        button.setAttribute("aria-label", "Play voice clip");
+
+        const url = URL.createObjectURL(record.audio);
+        const audio = new Audio(url);
+        audio.preload = "metadata";
+        const player = { audio, url, button };
+        audioPlayers.push(player);
+
+        function resetButton() {
+          button.textContent = "▶ Play";
+          button.setAttribute("aria-label", "Play voice clip");
+        }
+
+        audio.addEventListener("ended", resetButton);
+        audio.addEventListener("pause", resetButton);
+        const playbackStatus = document.createElement("span");
+        playbackStatus.className = "playback-status";
+        playbackStatus.setAttribute("role", "status");
+        playbackStatus.hidden = true;
+
+        button.addEventListener("click", async () => {
+          if (!audio.paused) {
+            audio.pause();
+            audio.currentTime = 0;
+            return;
+          }
+
+          audioPlayers.forEach((otherPlayer) => {
+            if (otherPlayer !== player) {
+              otherPlayer.audio.pause();
+              otherPlayer.audio.currentTime = 0;
+            }
+          });
+
+          try {
+            await audio.play();
+            playbackStatus.hidden = true;
+            button.textContent = "■ Stop";
+            button.setAttribute("aria-label", "Stop voice clip");
+          } catch (error) {
+            logError("The voice clip could not be played.", error);
+            playbackStatus.textContent = "This clip couldn’t play on this device.";
+            playbackStatus.hidden = false;
+            resetButton();
+          }
+        });
+
+        const controls = document.createElement("div");
+        controls.append(button, playbackStatus);
+        return controls;
+      }
+
+      function renderRecords(records, faceImageVersions) {
+        logContent.replaceChildren();
+
+        if (records.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "log-empty";
+          empty.textContent = "No check-ins yet.";
+          logContent.append(empty);
+          return;
+        }
+
+        const faceDetails = {
+          happy: { symbol: "😊", label: "Happy" },
+          neutral: { symbol: "😐", label: "Neutral" },
+          sad: { symbol: "😢", label: "Sad" }
+        };
+        const versionsById = new Map(
+          faceImageVersions.map((version) => [version.id, version])
+        );
+        const groups = new Map();
+
+        records
+          .slice()
+          .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
+          .forEach((record) => {
+            const date = new Date(record.timestamp);
+            const key = localDayKey(date);
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push({ record, date });
+          });
+
+        groups.forEach((entries) => {
+          const section = document.createElement("section");
+          section.className = "day-group";
+
+          const heading = document.createElement("h2");
+          heading.className = "day-heading";
+          heading.textContent = new Intl.DateTimeFormat(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          }).format(entries[0].date);
+
+          const list = document.createElement("ul");
+          list.className = "log-list";
+
+          entries.forEach(({ record, date }) => {
+            const details = faceDetails[record.face] || { symbol: "•", label: "Check-in" };
+            const item = document.createElement("li");
+            item.className = "log-entry";
+
+            let face;
+            const faceImageUrl = getLogFaceImageUrl(record, versionsById);
+            if (faceImageUrl) {
+              face = document.createElement("img");
+              face.className = "log-face-photo";
+              face.src = faceImageUrl;
+              face.alt = details.label;
+            } else {
+              face = document.createElement("span");
+              face.className = "log-face";
+              face.setAttribute("role", "img");
+              face.setAttribute("aria-label", details.label);
+              face.textContent = details.symbol;
+            }
+
+            const time = document.createElement("time");
+            time.className = "log-time";
+            time.dateTime = record.timestamp;
+            time.textContent = new Intl.DateTimeFormat(undefined, {
+              hour: "numeric",
+              minute: "2-digit"
+            }).format(date);
+
+            item.append(face, time);
+            if (record.audio instanceof Blob && record.audio.size > 0) {
+              item.append(makePlayButton(record));
+            }
+            list.append(item);
+          });
+
+          section.append(heading, list);
+          logContent.append(section);
+        });
+      }
+
+      async function renderLog() {
+        const token = ++logRenderToken;
+        cleanUpAudioPlayers();
+        cleanUpLogFaceImages();
+
+        const loading = document.createElement("p");
+        loading.className = "log-loading";
+        loading.textContent = "Loading…";
+        logContent.replaceChildren(loading);
+
+        // Face photos, their immutable versions, and check-ins live in separate
+        // stores. Wait for all three before deciding which image belongs in a row.
+        try {
+          const [records, , faceImageVersions] = await Promise.all([
+            getCheckIns(),
+            faceImagesReady,
+            getFaceImageVersions()
+          ]);
+          if (token !== logRenderToken || window.location.hash !== "#log") return;
+          renderRecords(records, faceImageVersions);
+        } catch (error) {
+          if (token !== logRenderToken || window.location.hash !== "#log") return;
+          loading.textContent = error.code === "database-blocked" ?
+            "Close the other Feelings Check-in tabs and reload to open the log." :
+            "Couldn’t open the saved check-ins. Try reloading this page.";
+        }
+      }
+
+      function renderRoute() {
+        const showRecovery = isRecoveryView();
+        const showLog = !showRecovery && window.location.hash === "#log";
+        const showFaceSetup = !showRecovery && window.location.hash === "#faces";
+        if (!childView.hidden && (showLog || showFaceSetup || showRecovery)) {
+          cancelRecording();
+          showFaceScreen();
+        }
+        childView.hidden = showLog || showFaceSetup || showRecovery;
+        logView.hidden = !showLog && !showRecovery;
+        faceSetupView.hidden = !showFaceSetup;
+        logContent.hidden = showRecovery;
+        logTitle.textContent = showRecovery ? "Pre-upgrade backup" : "Check-ins";
+        chooseBackupButton.hidden = showRecovery;
+
+        if (!showLog || lastBackupRoute !== "#log") {
+          backupViewVersion += 1;
+          clearPreparedBackup();
+          clearRestorePreview();
+          backupStatus.textContent = "";
+        }
+        lastBackupRoute = window.location.hash;
+        if (showRecovery) backupPanel.open = true;
+        if (!showRecovery && !faceImagesReady) faceImagesReady = loadSavedFaceImages();
+
+        if (showLog) {
+          cancelSpeech();
+          void renderLog();
+        } else {
+          ++logRenderToken;
+          cleanUpAudioPlayers();
+          cleanUpLogFaceImages();
+          if (showFaceSetup) cancelSpeech();
+        }
+      }
+
+      faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
+      faceImageInputs.forEach((input) => input.addEventListener("change", handleFaceImageChange));
+      resetFaceButtons.forEach((button) => button.addEventListener("click", handleResetFace));
+      recordButton.addEventListener("click", handleRecordButton);
+      noThanksButton.addEventListener("click", handleNoThanks);
+      exportBackupButton.addEventListener("click", handleExportBackup);
+      shareBackupButton.addEventListener("click", handleShareBackup);
+      downloadBackupLink.addEventListener("click", () => {
+        backupStatus.textContent = "Download requested. Check Files or Downloads to verify the backup.";
+      });
+      chooseBackupButton.addEventListener("click", () => backupFile.click());
+      backupFile.addEventListener("change", handleBackupFile);
+      confirmRestoreButton.addEventListener("click", handleConfirmRestore);
+      cancelRestoreButton.addEventListener("click", () => {
+        clearRestorePreview();
+        backupStatus.textContent = "Restore cancelled. Your saved data is unchanged.";
+        chooseBackupButton.focus();
+      });
+      window.addEventListener("hashchange", renderRoute);
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && activeRecording) {
+          cancelRecording();
+          showFaceScreen();
+        }
+      });
+      window.addEventListener("pagehide", () => {
+        cancelRecording();
+        showFaceScreen();
+        cleanUpAudioPlayers();
+        cleanUpLogFaceImages();
+        backupViewVersion += 1;
+        clearPreparedBackup();
+        clearRestorePreview();
+        backupStatus.textContent = "";
+      });
+      window.addEventListener("pageshow", (event) => {
+        if (event.persisted) renderRoute();
+      });
+
+      showFaceScreen();
+      renderRoute();
+    })();
+  </script>
+</body>
+</html>
