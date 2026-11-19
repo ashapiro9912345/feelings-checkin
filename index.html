@@ -73,7 +73,6 @@
     }
 
     .question,
-    .voice-title,
     .thanks-title {
       margin-bottom: clamp(24px, 7vh, 54px);
       font-size: clamp(2rem, 9vw, 3.4rem);
@@ -143,8 +142,13 @@
       opacity: 1;
     }
 
-    .voice-title {
+    /* The big sad face replaces the old written question, so the screen
+       makes sense without reading. */
+    .voice-face {
+      display: block;
       margin-bottom: clamp(22px, 6vh, 44px);
+      font-size: clamp(5rem, 26vw, 8.5rem);
+      line-height: 1;
     }
 
     .voice-actions {
@@ -358,16 +362,16 @@
       <p id="tapResponse" class="tap-response" aria-live="polite"></p>
     </section>
 
-    <section id="voicePanel" class="panel" aria-labelledby="voiceTitle" hidden>
-      <h1 id="voiceTitle" class="voice-title">Tell us why you’re sad</h1>
+    <section id="voicePanel" class="panel" aria-labelledby="voiceFace" hidden>
+      <span id="voiceFace" class="voice-face" role="img" aria-label="Sad">😢</span>
       <div class="voice-actions">
-        <button id="recordButton" class="choice-button" type="button" aria-label="Record a voice clip">
+        <button id="recordButton" class="choice-button" type="button" aria-label="Talk">
           <span class="choice-icon" aria-hidden="true">🎙️</span>
-          <span id="recordButtonText">Record</span>
+          <span id="recordButtonText">Talk</span>
         </button>
-        <button id="noThanksButton" class="choice-button" type="button">
+        <button id="allDoneButton" class="choice-button" type="button">
           <span class="choice-icon" aria-hidden="true">💛</span>
-          No thanks
+          All done
         </button>
       </div>
       <div id="listeningIndicator" class="listening" role="status" aria-live="polite">
@@ -416,7 +420,7 @@
       const tapResponse = document.querySelector("#tapResponse");
       const recordButton = document.querySelector("#recordButton");
       const recordButtonText = document.querySelector("#recordButtonText");
-      const noThanksButton = document.querySelector("#noThanksButton");
+      const allDoneButton = document.querySelector("#allDoneButton");
       const listeningIndicator = document.querySelector("#listeningIndicator");
       const logView = document.querySelector("#logView");
       const logContent = document.querySelector("#logContent");
@@ -649,60 +653,6 @@
         }
       }
 
-      function primeSpeechForSadPrompt() {
-        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-          return false;
-        }
-
-        try {
-          const speech = window.speechSynthesis;
-          speech.cancel();
-          speech.resume();
-
-          // iOS Safari may reject speech first requested after an await because
-          // the original tap's temporary user activation has expired. Speaking
-          // an inaudible utterance synchronously inside the tap handler primes
-          // the engine. The real words are still spoken only after the sad
-          // check-in's IndexedDB save attempt has finished.
-          const primer = new SpeechSynthesisUtterance("ready");
-          primer.volume = 0;
-          primer.rate = 2;
-          speech.speak(primer);
-          return true;
-        } catch (error) {
-          logError("Speech synthesis could not be prepared.", error);
-          return false;
-        }
-      }
-
-      function speakSadPrompt(speechWasPrimed) {
-        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-          return;
-        }
-
-        try {
-          const speech = window.speechSynthesis;
-          const prompt = new SpeechSynthesisUtterance("Tell us why you're sad");
-          prompt.rate = 0.92;
-          prompt.pitch = 1.04;
-
-          // Cancel any unfinished silent primer. resume() also clears an iOS
-          // Safari state where speech can remain paused after an interruption.
-          if (speechWasPrimed) speech.cancel();
-          speech.resume();
-          speech.speak(prompt);
-        } catch (error) {
-          // The text remains visible, which is the required fallback.
-          logError("The sad prompt could not be spoken.", error);
-        }
-      }
-
-      function cancelSpeech() {
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-        }
-      }
-
       function showOnly(panel) {
         checkinPanel.hidden = panel !== checkinPanel;
         voicePanel.hidden = panel !== voicePanel;
@@ -721,15 +671,14 @@
       function resetRecordingControls() {
         voiceChoiceLocked = false;
         recordButton.disabled = false;
-        recordButton.setAttribute("aria-label", "Record a voice clip");
-        recordButtonText.textContent = "Record";
-        noThanksButton.disabled = false;
+        recordButton.setAttribute("aria-label", "Talk");
+        recordButtonText.textContent = "Talk";
+        allDoneButton.disabled = false;
         listeningIndicator.classList.remove("is-visible");
       }
 
       function showFaceScreen() {
         window.clearTimeout(resetTimer);
-        cancelSpeech();
         currentSadCheckInId = null;
         faceTapLocked = false;
         tapResponse.textContent = "";
@@ -748,7 +697,6 @@
       }
 
       function showThanksThenReset() {
-        cancelSpeech();
         showOnly(thanksPanel);
         window.clearTimeout(resetTimer);
         resetTimer = window.setTimeout(showFaceScreen, THANK_YOU_DURATION_MS);
@@ -767,16 +715,14 @@
         // child always receives an immediate response to the tap.
         showImmediateResponse(selectedButton);
 
-        // Prime speech during the original sad tap. The real prompt is delayed
-        // until after the save attempt below, preserving the required ordering.
-        const speechWasPrimed = face === "sad" ? primeSpeechForSadPrompt() : false;
-
         const checkInId = await saveCheckIn(face, timestamp);
 
         if (face === "sad") {
           currentSadCheckInId = checkInId;
+          // The check-in is already saved (or the save quietly failed) before
+          // the Talk / All done choice appears, so his answer never depends
+          // on whether he records anything.
           showVoiceChoices();
-          speakSadPrompt(speechWasPrimed);
           return;
         }
 
@@ -869,8 +815,7 @@
         if (voiceChoiceLocked) return;
         voiceChoiceLocked = true;
         recordButton.disabled = true;
-        noThanksButton.disabled = true;
-        cancelSpeech();
+        allDoneButton.disabled = true;
 
         let stream = null;
         try {
@@ -935,11 +880,11 @@
         void startRecording();
       }
 
-      function handleNoThanks() {
+      function handleAllDone() {
         if (voiceChoiceLocked) return;
         voiceChoiceLocked = true;
         recordButton.disabled = true;
-        noThanksButton.disabled = true;
+        allDoneButton.disabled = true;
         showThanksThenReset();
       }
 
@@ -1104,7 +1049,6 @@
         logView.hidden = !showLog;
 
         if (showLog) {
-          cancelSpeech();
           void renderLog();
         } else {
           ++logRenderToken;
@@ -1114,10 +1058,9 @@
 
       faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
       recordButton.addEventListener("click", handleRecordButton);
-      noThanksButton.addEventListener("click", handleNoThanks);
+      allDoneButton.addEventListener("click", handleAllDone);
       window.addEventListener("hashchange", renderRoute);
       window.addEventListener("pagehide", () => {
-        cancelSpeech();
         cleanUpAudioPlayers();
         if (activeRecording) {
           releaseMicrophone(activeRecording.stream);

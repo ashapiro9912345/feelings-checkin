@@ -52,6 +52,8 @@ As my son, I can say why I'm sad if I want to, and skip it if I don't.
   SYSTEM SHALL stop recording automatically at 10 seconds. He can also tap
   to stop early. A calm listening indicator shows while recording. No
   countdown.
+- WHEN recording stops THE SYSTEM SHALL attach the clip to the sad check-in
+  that was already saved.
 - Either choice ends with the same warm thank-you, then returns to the
   faces.
 
