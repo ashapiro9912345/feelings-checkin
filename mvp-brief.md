@@ -48,8 +48,10 @@ As my son, I can say why I'm sad if I want to, and skip it if I don't.
   no speech.
 - Below it, two equally big buttons: 🎙 "Talk" and 💛 "All done". The
   pictures carry the meaning, so reading isn't required.
-- "Talk" records up to 10 seconds, with a tap to stop early and a calm
-  listening indicator. No countdown.
+- "Talk" records for up to 10 seconds. IF he doesn't tap to stop, THE
+  SYSTEM SHALL stop recording automatically at 10 seconds. He can also tap
+  to stop early. A calm listening indicator shows while recording. No
+  countdown.
 - Either choice ends with the same warm thank-you, then returns to the
   faces.
 
