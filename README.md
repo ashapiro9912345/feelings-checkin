@@ -129,6 +129,14 @@ manually add `#log` to the end of the same GitHub Pages URL in Safari.
 - **No speech:** The app never talks. The sad screen is a large 😢 and one
   💛 All done button, so no reading is needed.
 
+## Version label
+
+The small label in the bottom-right corner of every screen (for example
+`v1.1`) comes from `APP_VERSION` near the top of the script in `index.html`.
+Bump it whenever you publish a change. If his phone shows an older number
+than you expect, Safari has a cached copy: close the tab, wait up to ten
+minutes for GitHub Pages' cache, and open the URL again.
+
 ## Manual testing
 
 Follow [`TESTING.md`](TESTING.md) on the target iPhone. There is no automated

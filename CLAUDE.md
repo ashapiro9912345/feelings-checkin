@@ -74,5 +74,7 @@ Don't add files or folders unless a task asks for them.
 - Make the smallest change that does the task. No unrelated refactors.
 - After changes, tell me how to check them by hand.
 - Update README.md and TESTING.md when behavior or setup changes.
+- When a change will be published, bump `APP_VERSION` in index.html
+  (shown in the corner of every screen).
 - Explain what you changed and why, so I learn it.
 - When unsure, ask one specific question instead of guessing.

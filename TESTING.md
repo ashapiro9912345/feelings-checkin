@@ -28,6 +28,8 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 - [ ] With VoiceOver enabled, the buttons are announced as Happy, Neutral,
       and Sad.
 - [ ] There is no link to the parent log.
+- [ ] A small, faint version label (for example “v1.1”) shows in the
+      bottom-right corner and does not cover any face.
 - [ ] Nothing is ever spoken aloud.
 
 ## Happy and neutral
@@ -69,6 +71,7 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 
 - [ ] Open the same site with `#log` appended to its URL.
 - [ ] Entries are newest first and show the emoji face plus the local time.
+- [ ] The same version label shows in the bottom-right corner of the log.
 - [ ] Entries from different calendar days are grouped under day headings.
 - [ ] Only entries with clips show a video player (or ▶ Play for audio).
 - [ ] The log has no delete, export, chart, summary, score, count, or streak.
