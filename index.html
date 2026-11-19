@@ -1126,6 +1126,23 @@
         renderRecords(records);
       }
 
+      async function requestPersistentStorage() {
+        // By default a site's storage is "best effort": when the phone runs
+        // low on space, or Safari decides the site is unused, it may wipe
+        // IndexedDB (and every check-in and clip with it). persist() asks
+        // the browser to treat this site's data as "keep unless the user
+        // clears it". The browser decides on its own and never shows him a
+        // prompt. If it says no, or the API is missing, nothing changes.
+        if (!navigator.storage || !navigator.storage.persist) return;
+
+        try {
+          const granted = await navigator.storage.persist();
+          console.info(`[Feelings Check-in] Persistent storage ${granted ? "granted" : "not granted"}.`);
+        } catch (error) {
+          logError("Persistent storage could not be requested.", error);
+        }
+      }
+
       function renderRoute() {
         // Any hash other than #log (including the old #faces) shows his screen.
         const showLog = window.location.hash === "#log";
@@ -1152,6 +1169,7 @@
 
       showFaceScreen();
       renderRoute();
+      void requestPersistentStorage();
     })();
   </script>
 </body>
