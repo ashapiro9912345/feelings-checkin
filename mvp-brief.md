@@ -24,8 +24,8 @@ As my son, I want to tap a face so I can say how I feel without words.
 
 - WHEN the page loads THE SYSTEM SHALL show the question "How are you
   feeling?" and three large face buttons: happy, neutral, sad.
-- The faces SHALL be understandable without reading (large emoji or simple
-  drawings), each with an accessible label for screen readers.
+- The faces SHALL be the standard emoji 😊 😐 😢, each with an accessible
+  label. No custom photos.
 - Each face button SHALL be at least 30% of the screen width and easy to hit
   with a thumb.
 - WHEN any face is tapped THE SYSTEM SHALL respond within 100 ms with a
@@ -44,29 +44,19 @@ As my son, I can say why I'm sad if I want to, and skip it if I don't.
 - WHEN sad is tapped THE SYSTEM SHALL immediately save a check-in with the
   face and timestamp, before anything else happens. The check-in must
   never depend on the recording.
-- THE SYSTEM SHALL then show "Tell us why you're sad" and speak it aloud
-  using the browser's speech synthesis (the tap counts as the user gesture
-  iOS requires).
-- THE SYSTEM SHALL show two big buttons: a microphone button to record and
-  a "No thanks" button. Both are equally prominent. "No thanks" is never
-  hidden, small, or styled as the wrong choice.
-- WHEN the microphone button is tapped THE SYSTEM SHALL record audio for up
-  to 10 seconds, stopping automatically at 10 seconds. He can also tap to
-  stop early.
-- There SHALL be NO visible countdown, number, or progress-pressure timer.
-  A calm "listening" indicator (e.g. a softly pulsing circle) is fine.
-- WHEN recording stops THE SYSTEM SHALL attach the clip to the sad check-in
-  that was already saved, show a warm thank-you, and return to the
-  three-face screen.
-- WHEN "No thanks" is tapped THE SYSTEM SHALL show a warm thank-you (no
-  disappointment, no second prompt) and return to the three-face screen.
+- THE SYSTEM SHALL then show the 😢 emoji large, with no question text and
+  no speech.
+- Below it, two equally big buttons: 🎙 "Talk" and 💛 "All done". The
+  pictures carry the meaning, so reading isn't required.
+- "Talk" records up to 10 seconds, with a tap to stop early and a calm
+  listening indicator. No countdown.
+- Either choice ends with the same warm thank-you, then returns to the
+  faces.
 
 ### 4. Things going wrong, gracefully
 - IF microphone permission is denied or recording fails THEN THE SYSTEM
   SHALL keep the sad check-in, show the same warm thank-you, and never
   show an error message to him. (Log details to the console only.)
-- IF speech synthesis is unavailable THEN THE SYSTEM SHALL just show the
-  text.
 - Tapping multiple times quickly SHALL NOT create duplicate check-ins
   (ignore taps during the response animation).
 
@@ -96,6 +86,8 @@ As the parent, I want to see his check-ins and play clips on his phone.
 - Must be served over HTTPS (microphone requires a secure context).
   Hosting: a static host only (GitHub Pages, AWS Amplify Hosting, or
   S3 + CloudFront). No backend.
+- Call `navigator.storage.persist()` on load so iOS is less likely to
+  clear his data. Ignore the result quietly if it isn't supported.
 - Comment the JavaScript clearly. I'm learning, so explain the why, not
   just the what, especially for IndexedDB, MediaRecorder, and the iOS
   quirks.
@@ -118,6 +110,8 @@ choose defaults for them:
 - Home Screen / PWA install, service workers, offline caching. (On iOS,
   Home Screen web apps have separate storage from Safari, and the Shortcut
   opens Safari, so the MVP stays Safari-only.)
+- Custom face photos.
+- Speech synthesis or recorded voice prompts.
 
 ## Deliverables
 1. `index.html` meeting everything above.
