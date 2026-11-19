@@ -102,6 +102,9 @@ As the parent, I want to see his check-ins and play clips on his phone.
 - Must be served over HTTPS (microphone requires a secure context).
   Hosting: a static host only (GitHub Pages, AWS Amplify Hosting, or
   S3 + CloudFront). No backend.
+- Show a small, faint version label (e.g. "v1.1") in the bottom-right
+  corner of every screen, including the parent log, so the parent can tell
+  which version a phone has. It must not cover or block any button.
 - Call `navigator.storage.persist()` on load so iOS is less likely to
   clear his data. Ignore the result quietly if it isn't supported.
 - Comment the JavaScript clearly. I'm learning, so explain the why, not

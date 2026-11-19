@@ -321,6 +321,23 @@
       background: #2d2623;
     }
 
+    /* Small, faint version label pinned to the bottom-right corner on every
+       screen. env(safe-area-inset-*) keeps it clear of the iPhone's home
+       indicator and rounded corners. pointer-events: none means a thumb
+       landing on it still reaches whatever is underneath. */
+    .app-version {
+      position: fixed;
+      right: max(10px, env(safe-area-inset-right));
+      bottom: max(6px, env(safe-area-inset-bottom));
+      margin: 0;
+      color: rgba(51, 43, 40, 0.38);
+      font-size: 0.75rem;
+      font-weight: 600;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
     @keyframes warm-bounce {
       0% { transform: scale(0.88); }
       58% { transform: scale(1.08); }
@@ -395,10 +412,17 @@
     </div>
   </main>
 
+  <!-- Outside both views, so it shows on his screens and on the parent log.
+       The text is filled in from APP_VERSION below. -->
+  <p id="appVersion" class="app-version"></p>
+
   <script>
     (() => {
       "use strict";
 
+      // The app's version, shown in the corner of every screen. Bump this
+      // when you publish a change so you can tell which copy a phone has.
+      const APP_VERSION = "1.1";
       const DATABASE_NAME = "feelings-checkin";
       // Bumping the version is the only way IndexedDB lets us change which
       // object stores exist: the browser then runs onupgradeneeded once.
@@ -428,6 +452,7 @@
       const listeningIndicator = document.querySelector("#listeningIndicator");
       const logView = document.querySelector("#logView");
       const logContent = document.querySelector("#logContent");
+      const appVersionLabel = document.querySelector("#appVersion");
 
       let databasePromise = null;
       let faceTapLocked = false;
@@ -1148,6 +1173,9 @@
         const showLog = window.location.hash === "#log";
         childView.hidden = showLog;
         logView.hidden = !showLog;
+        // VoiceOver skips the label on his screens, where it means nothing to
+        // him, but reads it on the parent log.
+        appVersionLabel.setAttribute("aria-hidden", showLog ? "false" : "true");
 
         if (showLog) {
           void renderLog();
@@ -1167,6 +1195,7 @@
         }
       });
 
+      appVersionLabel.textContent = `v${APP_VERSION}`;
       showFaceScreen();
       renderRoute();
       void requestPersistentStorage();
