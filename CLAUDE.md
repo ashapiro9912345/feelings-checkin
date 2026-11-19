@@ -43,8 +43,9 @@ Don't add files or folders unless a task asks for them.
 - Every tap gets an instant, warm response.
 - No timers, countdowns, scores, streaks, badges, or wrong answers.
 - No speech synthesis anywhere. The app never talks.
-- The voice step is optional. "All done" is exactly as big and friendly
-  as "Talk". The sad check-in is saved before the voice step.
+- After a sad tap, recording starts automatically for up to 10 seconds.
+  One big, friendly "All done" button stops it early and keeps the clip.
+  The sad check-in is saved before recording starts.
 - Never show him an error. Log details to the console only.
 
 **Not clinical**

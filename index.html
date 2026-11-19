@@ -152,11 +152,9 @@
     }
 
     .voice-actions {
-      width: min(94vw, 500px);
+      width: min(62vw, 260px);
       margin-inline: auto;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(12px, 4vw, 22px);
     }
 
     .choice-button {
@@ -365,10 +363,6 @@
     <section id="voicePanel" class="panel" aria-labelledby="voiceFace" hidden>
       <span id="voiceFace" class="voice-face" role="img" aria-label="Sad">😢</span>
       <div class="voice-actions">
-        <button id="recordButton" class="choice-button" type="button" aria-label="Talk">
-          <span class="choice-icon" aria-hidden="true">🎙️</span>
-          <span id="recordButtonText">Talk</span>
-        </button>
         <button id="allDoneButton" class="choice-button" type="button">
           <span class="choice-icon" aria-hidden="true">💛</span>
           All done
@@ -418,8 +412,6 @@
       const thanksPanel = document.querySelector("#thanksPanel");
       const faceButtons = Array.from(document.querySelectorAll(".face-button"));
       const tapResponse = document.querySelector("#tapResponse");
-      const recordButton = document.querySelector("#recordButton");
-      const recordButtonText = document.querySelector("#recordButtonText");
       const allDoneButton = document.querySelector("#allDoneButton");
       const listeningIndicator = document.querySelector("#listeningIndicator");
       const logView = document.querySelector("#logView");
@@ -427,7 +419,12 @@
 
       let databasePromise = null;
       let faceTapLocked = false;
-      let voiceChoiceLocked = false;
+      // True once the sad screen is finishing (All done tapped, 10 seconds
+      // up, or the mic failed). Stops a second tap from doing anything.
+      let voiceStepFinished = false;
+      // Counts sad screens. A slow microphone start can only belong to the
+      // sad screen that asked for it, never to a later one.
+      let voiceSessionNumber = 0;
       let currentSadCheckInId = null;
       let activeRecording = null;
       let resetTimer = null;
@@ -669,10 +666,7 @@
       }
 
       function resetRecordingControls() {
-        voiceChoiceLocked = false;
-        recordButton.disabled = false;
-        recordButton.setAttribute("aria-label", "Talk");
-        recordButtonText.textContent = "Talk";
+        voiceStepFinished = false;
         allDoneButton.disabled = false;
         listeningIndicator.classList.remove("is-visible");
       }
@@ -691,9 +685,11 @@
         showOnly(checkinPanel);
       }
 
-      function showVoiceChoices() {
+      function showSadScreenAndListen() {
         resetRecordingControls();
+        voiceSessionNumber += 1;
         showOnly(voicePanel);
+        void startRecording(voiceSessionNumber);
       }
 
       function showThanksThenReset() {
@@ -720,9 +716,9 @@
         if (face === "sad") {
           currentSadCheckInId = checkInId;
           // The check-in is already saved (or the save quietly failed) before
-          // the Talk / All done choice appears, so his answer never depends
-          // on whether he records anything.
-          showVoiceChoices();
+          // the microphone turns on, so his answer never depends on the
+          // recording.
+          showSadScreenAndListen();
           return;
         }
 
@@ -766,6 +762,8 @@
       async function completeRecording(session, shouldAttachAudio) {
         if (session.finalized) return;
         session.finalized = true;
+        voiceStepFinished = true;
+        allDoneButton.disabled = true;
         window.clearTimeout(session.stopTimer);
         releaseMicrophone(session.stream);
         activeRecording = null;
@@ -791,8 +789,11 @@
         const session = activeRecording;
         if (!session || session.finalized) return;
 
+        // Lock All done right away. MediaRecorder finishes asynchronously, and
+        // a second stop request before then could cut off the final chunk.
+        voiceStepFinished = true;
+        allDoneButton.disabled = true;
         window.clearTimeout(session.stopTimer);
-        recordButton.disabled = true;
         listeningIndicator.classList.remove("is-visible");
 
         try {
@@ -811,12 +812,11 @@
         }
       }
 
-      async function startRecording() {
-        if (voiceChoiceLocked) return;
-        voiceChoiceLocked = true;
-        recordButton.disabled = true;
-        allDoneButton.disabled = true;
+      function isStillThisSadScreen(sessionNumber) {
+        return sessionNumber === voiceSessionNumber && !voiceStepFinished;
+      }
 
+      async function startRecording(sessionNumber) {
         let stream = null;
         try {
           if (!("mediaDevices" in navigator) || !("getUserMedia" in navigator.mediaDevices)) {
@@ -826,7 +826,18 @@
             throw new Error("MediaRecorder is unavailable");
           }
 
+          // No tap is needed here: iOS Safari asks for microphone permission
+          // per site, not per tap. If permission is set to Allow for this
+          // site, the mic simply turns on (the orange dot appears).
           stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+          // The permission prompt or mic start can take a moment. If he tapped
+          // All done meanwhile, turn the mic straight back off.
+          if (!isStillThisSadScreen(sessionNumber)) {
+            releaseMicrophone(stream);
+            return;
+          }
+
           const audioType = preferredAudioType();
           const recorder = createRecorder(stream, audioType);
           const session = {
@@ -857,9 +868,6 @@
           };
 
           recorder.start();
-          recordButton.disabled = false;
-          recordButton.setAttribute("aria-label", "Stop recording");
-          recordButtonText.textContent = "Stop";
           listeningIndicator.classList.add("is-visible");
 
           // The ten-second limit is intentionally invisible. It limits stored
@@ -868,22 +876,28 @@
         } catch (error) {
           releaseMicrophone(stream);
           logError("Microphone permission was denied or recording could not start.", error);
-          showThanksThenReset();
+          // Same warm ending as always; his sad check-in is already saved.
+          if (isStillThisSadScreen(sessionNumber)) {
+            voiceStepFinished = true;
+            allDoneButton.disabled = true;
+            showThanksThenReset();
+          }
         }
-      }
-
-      function handleRecordButton() {
-        if (activeRecording && activeRecording.recorder.state === "recording") {
-          requestRecordingStop();
-          return;
-        }
-        void startRecording();
       }
 
       function handleAllDone() {
-        if (voiceChoiceLocked) return;
-        voiceChoiceLocked = true;
-        recordButton.disabled = true;
+        if (voiceStepFinished) return;
+
+        if (activeRecording) {
+          // Stopping keeps whatever he has said so far. completeRecording
+          // attaches the clip and then shows the thank-you.
+          requestRecordingStop();
+          return;
+        }
+
+        // The mic hadn't started yet (for example, Safari was still asking
+        // for permission). Nothing was recorded, so just say thank you.
+        voiceStepFinished = true;
         allDoneButton.disabled = true;
         showThanksThenReset();
       }
@@ -1057,7 +1071,6 @@
       }
 
       faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
-      recordButton.addEventListener("click", handleRecordButton);
       allDoneButton.addEventListener("click", handleAllDone);
       window.addEventListener("hashchange", renderRoute);
       window.addEventListener("pagehide", () => {

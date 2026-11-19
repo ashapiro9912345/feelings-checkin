@@ -38,24 +38,26 @@ As my son, I want to tap a face so I can say how I feel without words.
 - THE SYSTEM SHALL then show a friendly thank-you and return to the
   three-face screen after a few seconds.
 
-### 3. Sad, with an optional voice clip
-As my son, I can say why I'm sad if I want to, and skip it if I don't.
+### 3. Sad, with a voice clip
+As my son, when I'm sad I can say why without tapping anything else.
 
 - WHEN sad is tapped THE SYSTEM SHALL immediately save a check-in with the
   face and timestamp, before anything else happens. The check-in must
   never depend on the recording.
 - THE SYSTEM SHALL then show the 😢 emoji large, with no question text and
-  no speech.
-- Below it, two equally big buttons: 🎙 "Talk" and 💛 "All done". The
-  pictures carry the meaning, so reading isn't required.
-- "Talk" records for up to 10 seconds. IF he doesn't tap to stop, THE
-  SYSTEM SHALL stop recording automatically at 10 seconds. He can also tap
-  to stop early. A calm listening indicator shows while recording. No
-  countdown.
+  no speech, and SHALL start recording automatically. He does not need to
+  tap anything to start.
+- A calm listening indicator shows while recording. No countdown.
+- Below the emoji, one big 💛 "All done" button. Tapping it stops the
+  recording early and keeps what he has said so far.
+- IF he doesn't tap All done, THE SYSTEM SHALL stop recording
+  automatically at 10 seconds.
 - WHEN recording stops THE SYSTEM SHALL attach the clip to the sad check-in
-  that was already saved.
-- Either choice ends with the same warm thank-you, then returns to the
+  that was already saved, show the warm thank-you, and return to the
   faces.
+- For the mic to start without a permission popup, the parent sets
+  Microphone to Allow for this site in Safari's Website Settings on his
+  phone.
 
 ### 4. Things going wrong, gracefully
 - IF microphone permission is denied or recording fails THEN THE SYSTEM
