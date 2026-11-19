@@ -22,6 +22,7 @@ README.md      local testing, deployment, Shortcut setup
 TESTING.md     manual test checklist for his iPhone
 mvp-brief.md   the spec (don't edit unless asked)
 CLAUDE.md      this file
+recovery.html  v1.0 backup page for the old photo data (don't edit)
 ```
 Don't add files or folders unless a task asks for them.
 

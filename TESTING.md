@@ -6,43 +6,29 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 ## Before testing
 
 - [ ] Use normal Safari, not a Home Screen web app or Private Browsing.
-- [ ] Confirm the child URL does not end in `#log` or `#faces`.
+- [ ] Confirm the child URL does not end in `#log`.
 - [ ] Keep the phone in portrait orientation.
-- [ ] For the first recording test, be ready to allow microphone access.
+- [ ] In Safari, tap **aA → Website Settings** for the site and set **Camera**
+      and **Microphone** to **Allow** (see `README.md`).
 
-## Face photo setup
+## Upgrade from v1.0 (only once, on a phone that had custom photos)
 
-- [ ] Open the same site with `#faces` appended to its URL.
-- [ ] For Happy, tap **Take or choose photo**, take a new picture, and confirm
-      the status progresses from preparing to saving to saved, then confirm the
-      preview changes from the emoji to the photo.
-- [ ] Choose separate pictures for Neutral and Sad and confirm all three
-      previews remain distinct.
-- [ ] Return to the child URL without `#faces`. Confirm the three large buttons
-      show the custom photos and still fit without horizontal scrolling.
-- [ ] Reload Safari, then close and reopen it. Confirm all three photos persist.
-- [ ] With the first Happy photo configured, make a Happy check-in.
-- [ ] Return to `#faces`, replace the Happy photo, then make a second Happy
-      check-in.
-- [ ] Open `#log`. Confirm the newer Happy entry uses the second photo and the
-      older Happy entry still uses the first photo.
-- [ ] Return to `#faces`, tap **Use emoji** for Happy, and make a third Happy
-      check-in. Confirm its log entry uses the emoji while the two older entries
-      retain their respective photos.
-- [ ] Confirm replacing or resetting photos does not change existing timestamps
-      or recordings.
-- [ ] If setup reports that the database is blocked, close every other Feelings
-      Check-in Safari tab, reload `#faces`, and confirm the photo then saves.
+- [ ] If you want the photos, save a backup with `recovery.html` first.
+- [ ] Open the v1.1 child URL. Confirm the three faces are the standard emoji
+      😊 😐 😢 with no photos.
+- [ ] Open `#log`. Confirm older check-ins are still listed, now with emoji,
+      and older voice clips still have ▶ Play and still play.
+- [ ] Open the old `#faces` URL. Confirm it simply shows the child screen.
 
 ## Child screen
 
-- [ ] The page shows “How are you feeling?” and three large faces.
-- [ ] Configured photos appear; any feeling without a photo uses its emoji.
+- [ ] The page shows “How are you feeling?” and three large emoji faces.
 - [ ] All three faces fit without horizontal scrolling.
 - [ ] Each face is easy to tap with a thumb and Safari does not zoom on a tap.
 - [ ] With VoiceOver enabled, the buttons are announced as Happy, Neutral,
       and Sad.
 - [ ] There is no link to the parent log.
+- [ ] Nothing is ever spoken aloud.
 
 ## Happy and neutral
 
@@ -52,49 +38,49 @@ Pages URL. Use the local URLs in `README.md` for preliminary desktop testing.
 - [ ] Rapidly tap one face several times. Only one new entry should appear in
       the parent log.
 
-## Sad without a recording
+## Sad: automatic video recording
 
 - [ ] Tap Sad. The tap receives the same immediate warm response.
-- [ ] “Tell us why you’re sad” appears and is spoken aloud.
-- [ ] Record and “No thanks” are both large and equally prominent.
-- [ ] Tap “No thanks.” A warm thank-you appears without another prompt, then
-      the face screen returns.
-- [ ] Open the parent log and confirm that the sad check-in was saved even
-      though no recording was made.
-
-## Sad with a recording
-
-- [ ] Tap Sad, then Record, and allow microphone access if Safari asks.
-- [ ] A calm listening indicator appears with no countdown or progress timer.
-- [ ] Speak briefly, then tap Stop. Confirm the microphone indicator turns off,
-      a warm thank-you appears, and the face screen returns.
-- [ ] In the parent log, tap Play on that sad entry and confirm the clip plays.
-- [ ] Make another sad recording without tapping Stop. Confirm it ends on its
-      own after about ten seconds without showing a countdown, then saves.
+- [ ] The next screen shows a large 😢, one big 💛 All done button, and the
+      calm “I’m listening” indicator. There is no question text, no speech,
+      no countdown, and he does not see himself.
+- [ ] The green camera dot appears at the top of the screen without any
+      further tap and without a permission popup.
+- [ ] Make a face and speak, then wait. After about ten seconds recording stops
+      on its own, the green dot goes away, a warm thank-you appears, and the
+      face screen returns.
+- [ ] Tap Sad again and tap All done after two or three seconds. Recording
+      stops right away and the same thank-you appears.
+- [ ] Tap Sad and quickly double-tap All done. Only one thank-you appears and
+      the clip still saves.
+- [ ] In the parent log, both sad entries show a video player. Each video shows
+      his face and plays its sound, and plays inline without forcing full screen.
 
 ## Permission and failure behavior
 
-- [ ] Reset the site's microphone permission if necessary, start a sad
-      recording, and choose **Don't Allow** at Safari's permission prompt.
-- [ ] Confirm the already-saved sad check-in remains in the parent log.
-- [ ] Confirm the child sees the same warm thank-you and no technical error.
-- [ ] If speech is muted or unavailable, confirm the written sad prompt still
-      appears and the rest of the flow works.
+- [ ] Set **Camera** to **Deny** (keep Microphone on Allow) and tap Sad.
+      Confirm an audio-only clip is saved: the log shows ▶ Play, not a video.
+- [ ] Set **Microphone** to **Deny** as well and tap Sad. Confirm the sad
+      check-in still appears in the log with no clip, and the child sees the
+      same warm thank-you and no technical error.
+- [ ] Set both back to **Allow** when done.
 
 ## Parent log and persistence
 
 - [ ] Open the same site with `#log` appended to its URL.
-- [ ] Entries are newest first and show the face photo (or emoji) that was active
-      when each check-in was made, plus the local time.
+- [ ] Entries are newest first and show the emoji face plus the local time.
 - [ ] Entries from different calendar days are grouped under day headings.
-- [ ] Only entries with recordings show a Play button.
+- [ ] Only entries with clips show a video player (or ▶ Play for audio).
 - [ ] The log has no delete, export, chart, summary, score, count, or streak.
 - [ ] Reload Safari and confirm the saved check-ins remain.
 - [ ] Close and reopen Safari, return to the same `#log` URL, and confirm the
-      saved check-ins and recordings remain and still play.
+      saved check-ins and clips remain and still play.
+- [ ] Optional (needs a Mac with Safari's Develop menu): inspect the page and
+      confirm the console shows “Persistent storage granted” or “not granted”,
+      with no errors either way.
 
 ## Shortcut
 
 - [ ] Run the Time of Day automation manually while the iPhone is unlocked.
-- [ ] Safari opens the GitHub Pages child URL, not the `#log` or `#faces` URL.
+- [ ] Safari opens the GitHub Pages child URL, not the `#log` URL.
 - [ ] The three-face screen is ready for one-tap use.
