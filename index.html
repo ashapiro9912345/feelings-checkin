@@ -128,15 +128,6 @@
       filter: saturate(0.92);
     }
 
-    .face-photo {
-      width: min(26vw, 142px);
-      aspect-ratio: 1;
-      display: block;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 5px 14px rgba(61, 45, 36, 0.2);
-    }
-
     .tap-response {
       min-height: 2.1em;
       margin: clamp(18px, 5vh, 36px) 12px 0;
@@ -231,8 +222,7 @@
       color: #3d6f66;
     }
 
-    .log-view,
-    .face-setup-view {
+    .log-view {
       width: min(100%, 760px);
       min-height: 100vh;
       min-height: 100dvh;
@@ -304,15 +294,6 @@
       line-height: 1;
     }
 
-    .log-face-photo {
-      width: 54px;
-      height: 54px;
-      display: block;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 3px 9px rgba(61, 45, 36, 0.18);
-    }
-
     .log-time {
       font-size: 1.08rem;
       font-weight: 700;
@@ -328,133 +309,6 @@
       color: #315e57;
       font-weight: 800;
       cursor: pointer;
-    }
-
-    .setup-title {
-      margin-bottom: 10px;
-      font-size: clamp(2rem, 8vw, 3rem);
-      letter-spacing: -0.035em;
-    }
-
-    .setup-intro {
-      max-width: 610px;
-      margin-bottom: 26px;
-      color: #635650;
-      font-size: 1.08rem;
-      line-height: 1.5;
-    }
-
-    .setup-grid {
-      display: grid;
-      gap: 18px;
-    }
-
-    .setup-card {
-      padding: 18px;
-      display: grid;
-      grid-template-columns: 104px minmax(0, 1fr);
-      align-items: center;
-      gap: 18px;
-      border: 1px solid rgba(82, 65, 57, 0.13);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.88);
-      box-shadow: 0 10px 25px rgba(91, 67, 49, 0.1);
-    }
-
-    .setup-preview {
-      width: 104px;
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      border-radius: 50%;
-      background: #fff8ed;
-      font-size: 4.6rem;
-      line-height: 1;
-    }
-
-    .setup-preview-photo {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-    }
-
-    .setup-card-title {
-      margin-bottom: 12px;
-      font-size: 1.35rem;
-    }
-
-    .setup-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .photo-picker,
-    .default-button {
-      min-height: 50px;
-      padding: 10px 12px;
-      display: grid;
-      place-items: center;
-      border: 2px solid #9bbdb6;
-      border-radius: 16px;
-      background: #eff8f5;
-      color: #315e57;
-      font-weight: 800;
-      line-height: 1.15;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .default-button {
-      border-color: #d5c4b6;
-      background: #fffaf3;
-      color: #635650;
-    }
-
-    .default-button:disabled {
-      cursor: default;
-      opacity: 0.5;
-    }
-
-    .file-input {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
-
-    .file-input:focus-visible + .photo-picker {
-      outline: 4px solid #246b64;
-      outline-offset: 4px;
-    }
-
-    .setup-status {
-      min-height: 1.5em;
-      margin: 22px 4px 0;
-      color: #3d6f66;
-      font-weight: 700;
-    }
-
-    @media (max-width: 430px) {
-      .setup-card {
-        grid-template-columns: 82px minmax(0, 1fr);
-        gap: 14px;
-        padding: 14px;
-      }
-
-      .setup-preview {
-        width: 82px;
-        font-size: 3.6rem;
-      }
-
-      .setup-actions {
-        grid-template-columns: 1fr;
-      }
     }
 
     @keyframes warm-bounce {
@@ -487,20 +341,17 @@
       <div class="face-grid">
         <button class="face-button" type="button" data-face="happy" aria-label="Happy">
           <span class="face" aria-hidden="true">
-            <span class="face-emoji" data-face-fallback="happy">😊</span>
-            <img class="face-photo" data-face-photo="happy" alt="" hidden>
+            <span class="face-emoji">😊</span>
           </span>
         </button>
         <button class="face-button" type="button" data-face="neutral" aria-label="Neutral">
           <span class="face" aria-hidden="true">
-            <span class="face-emoji" data-face-fallback="neutral">😐</span>
-            <img class="face-photo" data-face-photo="neutral" alt="" hidden>
+            <span class="face-emoji">😐</span>
           </span>
         </button>
         <button class="face-button" type="button" data-face="sad" aria-label="Sad">
           <span class="face" aria-hidden="true">
-            <span class="face-emoji" data-face-fallback="sad">😢</span>
-            <img class="face-photo" data-face-photo="sad" alt="" hidden>
+            <span class="face-emoji">😢</span>
           </span>
         </button>
       </div>
@@ -538,79 +389,24 @@
     </div>
   </main>
 
-  <main id="faceSetupView" class="face-setup-view" hidden>
-    <h1 class="setup-title">Your face photos</h1>
-    <p class="setup-intro">
-      Take or choose one photo for each feeling. Photos are cropped on this
-      device and stay in this browser only.
-    </p>
-    <div class="setup-grid">
-      <section class="setup-card" aria-labelledby="happySetupTitle">
-        <div class="setup-preview" aria-hidden="true">
-          <span data-face-fallback="happy">😊</span>
-          <img class="setup-preview-photo" data-face-photo="happy" alt="" hidden>
-        </div>
-        <div>
-          <h2 id="happySetupTitle" class="setup-card-title">Happy</h2>
-          <div class="setup-actions">
-            <input id="happyPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="happy">
-            <label class="photo-picker" for="happyPhotoInput">Take or choose photo</label>
-            <button class="default-button" type="button" data-reset-face="happy" disabled>Use emoji</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="setup-card" aria-labelledby="neutralSetupTitle">
-        <div class="setup-preview" aria-hidden="true">
-          <span data-face-fallback="neutral">😐</span>
-          <img class="setup-preview-photo" data-face-photo="neutral" alt="" hidden>
-        </div>
-        <div>
-          <h2 id="neutralSetupTitle" class="setup-card-title">Neutral</h2>
-          <div class="setup-actions">
-            <input id="neutralPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="neutral">
-            <label class="photo-picker" for="neutralPhotoInput">Take or choose photo</label>
-            <button class="default-button" type="button" data-reset-face="neutral" disabled>Use emoji</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="setup-card" aria-labelledby="sadSetupTitle">
-        <div class="setup-preview" aria-hidden="true">
-          <span data-face-fallback="sad">😢</span>
-          <img class="setup-preview-photo" data-face-photo="sad" alt="" hidden>
-        </div>
-        <div>
-          <h2 id="sadSetupTitle" class="setup-card-title">Sad</h2>
-          <div class="setup-actions">
-            <input id="sadPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="sad">
-            <label class="photo-picker" for="sadPhotoInput">Take or choose photo</label>
-            <button class="default-button" type="button" data-reset-face="sad" disabled>Use emoji</button>
-          </div>
-        </div>
-      </section>
-    </div>
-    <p id="faceSetupStatus" class="setup-status" role="status" aria-live="polite"></p>
-  </main>
-
   <script>
     (() => {
       "use strict";
 
       const DATABASE_NAME = "feelings-checkin";
-      const DATABASE_VERSION = 3;
+      // Bumping the version is the only way IndexedDB lets us change which
+      // object stores exist: the browser then runs onupgradeneeded once.
+      // Version 5 (not 4) because recovery.html may already have upgraded his
+      // database to 4. Opening with a lower number than the database has
+      // fails outright, which would quietly stop check-ins from saving.
+      const DATABASE_VERSION = 5;
       const CHECKINS_STORE_NAME = "checkins";
-      const FACE_IMAGES_STORE_NAME = "faceImages";
-      const FACE_IMAGE_VERSIONS_STORE_NAME = "faceImageVersions";
+      // Old stores from the removed custom-photo feature (v1.0). They are
+      // deleted during the upgrade below; nothing reads or writes them now.
+      const OLD_PHOTO_STORE_NAMES = ["faceImages", "faceImageVersions"];
       const THANK_YOU_DURATION_MS = 2400;
       const RECORDING_LIMIT_MS = 10000;
       const STORAGE_TIMEOUT_MS = 2500;
-      const PHOTO_STORAGE_TIMEOUT_MS = 15000;
-      const FACE_LABELS = {
-        happy: "Happy",
-        neutral: "Neutral",
-        sad: "Sad"
-      };
 
       const childView = document.querySelector("#childView");
       const checkinPanel = document.querySelector("#checkinPanel");
@@ -624,10 +420,6 @@
       const listeningIndicator = document.querySelector("#listeningIndicator");
       const logView = document.querySelector("#logView");
       const logContent = document.querySelector("#logContent");
-      const faceSetupView = document.querySelector("#faceSetupView");
-      const faceSetupStatus = document.querySelector("#faceSetupStatus");
-      const faceImageInputs = Array.from(document.querySelectorAll("[data-face-image-input]"));
-      const resetFaceButtons = Array.from(document.querySelectorAll("[data-reset-face]"));
 
       let databasePromise = null;
       let faceTapLocked = false;
@@ -637,12 +429,6 @@
       let resetTimer = null;
       let logRenderToken = 0;
       let audioPlayers = [];
-      let faceImagesReady = null;
-      let lastFaceImageSaveError = null;
-      let databaseUpgradeBlocked = false;
-      const faceImageUrls = new Map();
-      const faceImageVersionIds = new Map();
-      const logFaceImageUrls = new Map();
 
       function logError(message, error) {
         // Technical details belong in developer tools, never in the child's UI.
@@ -702,54 +488,18 @@
               });
             }
 
-            if (!database.objectStoreNames.contains(FACE_IMAGES_STORE_NAME)) {
-              // Face photos have a different lifecycle from check-ins, so a
-              // separate store lets a parent replace them without touching the
-              // child's history. The image Blob still never leaves IndexedDB.
-              database.createObjectStore(FACE_IMAGES_STORE_NAME, {
-                keyPath: "face"
-              });
-            }
-
-            if (!database.objectStoreNames.contains(FACE_IMAGE_VERSIONS_STORE_NAME)) {
-              // Each saved photo version gets its own local id. A check-in can
-              // reference that id without copying the same Blob into every row.
-              const versionStore = database.createObjectStore(FACE_IMAGE_VERSIONS_STORE_NAME, {
-                keyPath: "id",
-                autoIncrement: true
-              });
-              const currentStore = request.transaction.objectStore(FACE_IMAGES_STORE_NAME);
-              const cursorRequest = currentStore.openCursor();
-
-              // Version 2 stored only the current photo. Preserve that photo as
-              // the first version so future check-ins can snapshot it without
-              // asking the parent to upload it again.
-              cursorRequest.onsuccess = () => {
-                const cursor = cursorRequest.result;
-                if (!cursor) return;
-
-                const record = cursor.value;
-                if (record.image instanceof Blob && record.versionId === undefined) {
-                  const versionRequest = versionStore.add({
-                    face: record.face,
-                    image: record.image,
-                    createdAt: record.updatedAt || new Date().toISOString()
-                  });
-                  versionRequest.onsuccess = () => {
-                    record.versionId = versionRequest.result;
-                    const updateRequest = cursor.update(record);
-                    updateRequest.onsuccess = () => cursor.continue();
-                  };
-                  return;
-                }
-
-                cursor.continue();
-              };
-            }
+            // Remove the photo stores if this phone still has them. Deleting
+            // a store also deletes its photos. Check-ins live in their own
+            // store, so they are untouched. Some old check-ins still carry a
+            // faceImageVersionId field; it is simply ignored now.
+            OLD_PHOTO_STORE_NAMES.forEach((storeName) => {
+              if (database.objectStoreNames.contains(storeName)) {
+                database.deleteObjectStore(storeName);
+              }
+            });
           };
 
           request.onsuccess = () => {
-            databaseUpgradeBlocked = false;
             if (settled) {
               request.result.close();
               return;
@@ -772,7 +522,6 @@
 
           request.onblocked = () => {
             if (settled) return;
-            databaseUpgradeBlocked = true;
             settled = true;
             reject(makeDatabaseBlockedError());
           };
@@ -855,89 +604,7 @@
         });
       }
 
-      function putFaceImageRecord(database, face, image) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(
-            [FACE_IMAGES_STORE_NAME, FACE_IMAGE_VERSIONS_STORE_NAME],
-            "readwrite"
-          );
-          const currentStore = transaction.objectStore(FACE_IMAGES_STORE_NAME);
-          const versionStore = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME);
-          const updatedAt = new Date().toISOString();
-          const versionRequest = versionStore.add({ face, image, createdAt: updatedAt });
-          let versionId = null;
-
-          versionRequest.onsuccess = () => {
-            versionId = versionRequest.result;
-            currentStore.put({ face, image, updatedAt, versionId });
-          };
-
-          // Both writes share one transaction: a photo cannot become current
-          // unless its immutable history version was also saved successfully.
-          transaction.oncomplete = () => resolve(versionId);
-          transaction.onerror = () => {
-            reject(transaction.error || versionRequest.error || new Error("Could not save the face photo"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || versionRequest.error || new Error("Face photo transaction was aborted"));
-          };
-        });
-      }
-
-      function deleteFaceImageRecord(database, face) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readwrite");
-          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).delete(face);
-
-          transaction.oncomplete = () => resolve();
-          transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not remove the face photo"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo transaction was aborted"));
-          };
-        });
-      }
-
-      function readAllFaceImages(database) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readonly");
-          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).getAll();
-          let records = [];
-
-          request.onsuccess = () => {
-            records = request.result;
-          };
-          transaction.oncomplete = () => resolve(records);
-          transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not read face photos"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo read was aborted"));
-          };
-        });
-      }
-
-      function readAllFaceImageVersions(database) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGE_VERSIONS_STORE_NAME, "readonly");
-          const request = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME).getAll();
-          let records = [];
-
-          request.onsuccess = () => {
-            records = request.result;
-          };
-          transaction.oncomplete = () => resolve(records);
-          transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not read face photo history"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo history read was aborted"));
-          };
-        });
-      }
-
-      async function saveCheckIn(face, timestamp, faceImageVersionId) {
+      async function saveCheckIn(face, timestamp) {
         try {
           const database = await finishWithin(openDatabase(), "Opening storage");
           return await finishWithin(
@@ -945,8 +612,7 @@
               face,
               timestamp,
               audio: null,
-              audioType: null,
-              faceImageVersionId
+              audioType: null
             }),
             "Saving the check-in"
           );
@@ -980,250 +646,6 @@
         } catch (error) {
           logError("The check-in log could not be read.", error);
           return [];
-        }
-      }
-
-      async function saveFaceImage(face, image) {
-        lastFaceImageSaveError = null;
-        if (databaseUpgradeBlocked) {
-          lastFaceImageSaveError = makeDatabaseBlockedError();
-          logError("The face photo could not be saved.", lastFaceImageSaveError);
-          return null;
-        }
-
-        try {
-          // Parent setup can wait longer than the child's one-tap flow. iOS may
-          // need several seconds to finish a database upgrade or write a photo.
-          const database = await finishWithin(
-            openDatabase(),
-            "Opening storage",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-          return await finishWithin(
-            putFaceImageRecord(database, face, image),
-            "Saving the face photo",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-        } catch (error) {
-          lastFaceImageSaveError = error;
-          logError("The face photo could not be saved.", error);
-          return null;
-        }
-      }
-
-      function faceImageSaveMessage(error) {
-        if (
-          databaseUpgradeBlocked ||
-          (error && (error.code === "database-blocked" || error.message.includes("blocked")))
-        ) {
-          return "Close other Feelings Check-in tabs, reload this page, and try again.";
-        }
-        if (error && error.name === "QuotaExceededError") {
-          return "Safari does not have enough local storage for that photo.";
-        }
-        return "That photo couldn’t be saved. Reload this page and try again.";
-      }
-
-      async function removeFaceImage(face) {
-        try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
-          await finishWithin(
-            deleteFaceImageRecord(database, face),
-            "Removing the face photo"
-          );
-          return true;
-        } catch (error) {
-          logError("The face photo could not be removed.", error);
-          return false;
-        }
-      }
-
-      async function getFaceImages() {
-        try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
-          return await finishWithin(readAllFaceImages(database), "Reading face photos");
-        } catch (error) {
-          logError("The face photos could not be read.", error);
-          return [];
-        }
-      }
-
-      async function getFaceImageVersions() {
-        try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
-          return await finishWithin(
-            readAllFaceImageVersions(database),
-            "Reading face photo history"
-          );
-        } catch (error) {
-          logError("The face photo history could not be read.", error);
-          return [];
-        }
-      }
-
-      function displayFaceImage(face, image, versionId = null) {
-        const oldUrl = faceImageUrls.get(face);
-        const photoElements = document.querySelectorAll(`[data-face-photo="${face}"]`);
-        const fallbackElements = document.querySelectorAll(`[data-face-fallback="${face}"]`);
-        const resetButton = resetFaceButtons.find((button) => button.dataset.resetFace === face);
-
-        photoElements.forEach((element) => {
-          element.hidden = true;
-          element.removeAttribute("src");
-        });
-        if (oldUrl) {
-          URL.revokeObjectURL(oldUrl);
-          faceImageUrls.delete(face);
-        }
-        faceImageVersionIds.delete(face);
-
-        if (image instanceof Blob && image.size > 0) {
-          // One object URL can feed both the child button and setup preview.
-          // It points at the local Blob; it does not make a network request.
-          const url = URL.createObjectURL(image);
-          faceImageUrls.set(face, url);
-          if (versionId !== null && versionId !== undefined) {
-            faceImageVersionIds.set(face, versionId);
-          }
-          photoElements.forEach((element) => {
-            element.src = url;
-            element.hidden = false;
-          });
-          fallbackElements.forEach((element) => {
-            element.hidden = true;
-          });
-          if (resetButton) resetButton.disabled = false;
-          return;
-        }
-
-        fallbackElements.forEach((element) => {
-          element.hidden = false;
-        });
-        if (resetButton) resetButton.disabled = true;
-      }
-
-      async function loadSavedFaceImages() {
-        const records = await getFaceImages();
-        records.forEach((record) => {
-          if (FACE_LABELS[record.face] && record.image instanceof Blob) {
-            displayFaceImage(record.face, record.image, record.versionId);
-          }
-        });
-      }
-
-      async function prepareFaceImage(file) {
-        // Some iOS camera and Photos picker results omit the MIME type. Let the
-        // browser attempt to decode those files instead of rejecting them early.
-        if (file.type && !file.type.startsWith("image/")) {
-          throw new Error("The selected file is not an image");
-        }
-
-        const sourceUrl = URL.createObjectURL(file);
-        try {
-          const sourceImage = new Image();
-          sourceImage.decoding = "async";
-          await finishWithin(
-            new Promise((resolve, reject) => {
-              sourceImage.onload = resolve;
-              sourceImage.onerror = () => reject(new Error("The selected image could not be opened"));
-              sourceImage.src = sourceUrl;
-            }),
-            "Opening the selected photo",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-
-          if (!sourceImage.naturalWidth || !sourceImage.naturalHeight) {
-            throw new Error("The selected image has no usable dimensions");
-          }
-
-          // Center-cropping keeps all three buttons consistent. Resizing to at
-          // most 720px avoids filling Safari's storage with full camera photos.
-          // Re-encoding also strips camera metadata such as GPS coordinates.
-          const sourceSide = Math.min(sourceImage.naturalWidth, sourceImage.naturalHeight);
-          const outputSize = Math.min(720, sourceSide);
-          const sourceX = (sourceImage.naturalWidth - sourceSide) / 2;
-          const sourceY = (sourceImage.naturalHeight - sourceSide) / 2;
-          const canvas = document.createElement("canvas");
-          canvas.width = outputSize;
-          canvas.height = outputSize;
-          const context = canvas.getContext("2d");
-          if (!context) throw new Error("Image resizing is unavailable");
-
-          context.fillStyle = "#fff8ed";
-          context.fillRect(0, 0, outputSize, outputSize);
-          context.drawImage(
-            sourceImage,
-            sourceX,
-            sourceY,
-            sourceSide,
-            sourceSide,
-            0,
-            0,
-            outputSize,
-            outputSize
-          );
-
-          return await finishWithin(
-            new Promise((resolve, reject) => {
-              canvas.toBlob((blob) => {
-                if (blob) resolve(blob);
-                else reject(new Error("The resized image could not be created"));
-              }, "image/jpeg", 0.86);
-            }),
-            "Preparing the selected photo",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-        } finally {
-          URL.revokeObjectURL(sourceUrl);
-        }
-      }
-
-      async function handleFaceImageChange(event) {
-        const input = event.currentTarget;
-        const face = input.dataset.faceImageInput;
-        const file = input.files && input.files[0];
-        input.value = "";
-        if (!file || !FACE_LABELS[face]) return;
-
-        input.disabled = true;
-        faceSetupStatus.textContent = `Preparing ${FACE_LABELS[face].toLowerCase()} photo…`;
-
-        try {
-          await faceImagesReady;
-          const image = await prepareFaceImage(file);
-          faceSetupStatus.textContent = `Saving ${FACE_LABELS[face].toLowerCase()} photo…`;
-          const versionId = await saveFaceImage(face, image);
-          if (versionId === null) {
-            faceSetupStatus.textContent = faceImageSaveMessage(lastFaceImageSaveError);
-            return;
-          }
-
-          displayFaceImage(face, image, versionId);
-          faceSetupStatus.textContent = `${FACE_LABELS[face]} photo saved on this device.`;
-        } catch (error) {
-          logError("The selected face photo could not be prepared.", error);
-          faceSetupStatus.textContent = "That photo couldn’t be used. Please try another.";
-        } finally {
-          input.disabled = false;
-        }
-      }
-
-      async function handleResetFace(event) {
-        const button = event.currentTarget;
-        const face = button.dataset.resetFace;
-        if (!FACE_LABELS[face]) return;
-
-        button.disabled = true;
-        faceSetupStatus.textContent = `Restoring the ${FACE_LABELS[face].toLowerCase()} emoji…`;
-        await faceImagesReady;
-        const wasRemoved = await removeFaceImage(face);
-
-        if (wasRemoved) {
-          displayFaceImage(face, null);
-          faceSetupStatus.textContent = `${FACE_LABELS[face]} now uses the emoji.`;
-        } else {
-          button.disabled = false;
-          faceSetupStatus.textContent = "That photo couldn’t be reset. Please try again.";
         }
       }
 
@@ -1349,12 +771,7 @@
         // until after the save attempt below, preserving the required ordering.
         const speechWasPrimed = face === "sad" ? primeSpeechForSadPrompt() : false;
 
-        // Loading is normally complete before a tap. Awaiting it here handles a
-        // very fast first tap while keeping the visual response above instant.
-        // The saved version id freezes the exact photo used for this check-in.
-        await faceImagesReady;
-        const faceImageVersionId = faceImageVersionIds.get(face) || null;
-        const checkInId = await saveCheckIn(face, timestamp, faceImageVersionId);
+        const checkInId = await saveCheckIn(face, timestamp);
 
         if (face === "sad") {
           currentSadCheckInId = checkInId;
@@ -1541,39 +958,6 @@
         audioPlayers = [];
       }
 
-      function cleanUpLogFaceImages() {
-        logFaceImageUrls.forEach((url) => URL.revokeObjectURL(url));
-        logFaceImageUrls.clear();
-      }
-
-      function getLogFaceImageUrl(record, versionsById) {
-        const hasSavedPhotoVersion = Object.prototype.hasOwnProperty.call(
-          record,
-          "faceImageVersionId"
-        );
-
-        if (hasSavedPhotoVersion) {
-          // null means the emoji was active at check-in time. If a referenced
-          // Blob is missing, the honest fallback is also the emoji—not a newer
-          // photo that would rewrite history.
-          if (record.faceImageVersionId === null) return null;
-          const version = versionsById.get(record.faceImageVersionId);
-          if (!version || !(version.image instanceof Blob) || version.image.size === 0) {
-            return null;
-          }
-
-          if (!logFaceImageUrls.has(version.id)) {
-            logFaceImageUrls.set(version.id, URL.createObjectURL(version.image));
-          }
-          return logFaceImageUrls.get(version.id);
-        }
-
-        // Records saved before photo versioning contain no historical link.
-        // Continue showing the current photo for those legacy rows because the
-        // exact photo active at their check-in time cannot be reconstructed.
-        return faceImageUrls.get(record.face) || null;
-      }
-
       function makePlayButton(record) {
         const button = document.createElement("button");
         button.type = "button";
@@ -1622,7 +1006,7 @@
         return button;
       }
 
-      function renderRecords(records, faceImageVersions) {
+      function renderRecords(records) {
         logContent.replaceChildren();
 
         if (records.length === 0) {
@@ -1638,9 +1022,6 @@
           neutral: { symbol: "😐", label: "Neutral" },
           sad: { symbol: "😢", label: "Sad" }
         };
-        const versionsById = new Map(
-          faceImageVersions.map((version) => [version.id, version])
-        );
         const groups = new Map();
 
         records
@@ -1674,20 +1055,13 @@
             const item = document.createElement("li");
             item.className = "log-entry";
 
-            let face;
-            const faceImageUrl = getLogFaceImageUrl(record, versionsById);
-            if (faceImageUrl) {
-              face = document.createElement("img");
-              face.className = "log-face-photo";
-              face.src = faceImageUrl;
-              face.alt = details.label;
-            } else {
-              face = document.createElement("span");
-              face.className = "log-face";
-              face.setAttribute("role", "img");
-              face.setAttribute("aria-label", details.label);
-              face.textContent = details.symbol;
-            }
+            // Every row shows the standard emoji, including check-ins made
+            // back when custom photos existed.
+            const face = document.createElement("span");
+            face.className = "log-face";
+            face.setAttribute("role", "img");
+            face.setAttribute("aria-label", details.label);
+            face.textContent = details.symbol;
 
             const time = document.createElement("time");
             time.className = "log-time";
@@ -1712,30 +1086,22 @@
       async function renderLog() {
         const token = ++logRenderToken;
         cleanUpAudioPlayers();
-        cleanUpLogFaceImages();
 
         const loading = document.createElement("p");
         loading.className = "log-loading";
         loading.textContent = "Loading…";
         logContent.replaceChildren(loading);
 
-        // Face photos, their immutable versions, and check-ins live in separate
-        // stores. Wait for all three before deciding which image belongs in a row.
-        const [records, , faceImageVersions] = await Promise.all([
-          getCheckIns(),
-          faceImagesReady,
-          getFaceImageVersions()
-        ]);
+        const records = await getCheckIns();
         if (token !== logRenderToken || window.location.hash !== "#log") return;
-        renderRecords(records, faceImageVersions);
+        renderRecords(records);
       }
 
       function renderRoute() {
+        // Any hash other than #log (including the old #faces) shows his screen.
         const showLog = window.location.hash === "#log";
-        const showFaceSetup = window.location.hash === "#faces";
-        childView.hidden = showLog || showFaceSetup;
+        childView.hidden = showLog;
         logView.hidden = !showLog;
-        faceSetupView.hidden = !showFaceSetup;
 
         if (showLog) {
           cancelSpeech();
@@ -1743,28 +1109,22 @@
         } else {
           ++logRenderToken;
           cleanUpAudioPlayers();
-          cleanUpLogFaceImages();
-          if (showFaceSetup) cancelSpeech();
         }
       }
 
       faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
-      faceImageInputs.forEach((input) => input.addEventListener("change", handleFaceImageChange));
-      resetFaceButtons.forEach((button) => button.addEventListener("click", handleResetFace));
       recordButton.addEventListener("click", handleRecordButton);
       noThanksButton.addEventListener("click", handleNoThanks);
       window.addEventListener("hashchange", renderRoute);
       window.addEventListener("pagehide", () => {
         cancelSpeech();
         cleanUpAudioPlayers();
-        cleanUpLogFaceImages();
         if (activeRecording) {
           releaseMicrophone(activeRecording.stream);
         }
       });
 
       showFaceScreen();
-      faceImagesReady = loadSavedFaceImages();
       renderRoute();
     })();
   </script>
