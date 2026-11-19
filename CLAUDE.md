@@ -43,7 +43,8 @@ Don't add files or folders unless a task asks for them.
 - Every tap gets an instant, warm response.
 - No timers, countdowns, scores, streaks, badges, or wrong answers.
 - No speech synthesis anywhere. The app never talks.
-- After a sad tap, recording starts automatically for up to 10 seconds.
+- After a sad tap, video recording (front camera + mic) starts
+  automatically for up to 10 seconds. He doesn't see himself on screen.
   One big, friendly "All done" button stops it early and keeps the clip.
   The sad check-in is saved before recording starts.
 - Never show him an error. Log details to the console only.
@@ -63,8 +64,8 @@ Don't add files or folders unless a task asks for them.
   front-end and iOS. Explain why, especially for IndexedDB,
   MediaRecorder, and iOS Safari quirks. Skip basic data concepts.
 - Plain, readable code. Small named functions. async/await.
-- Pick the audio type with `MediaRecorder.isTypeSupported`. Stop all
-  mic tracks as soon as recording ends.
+- Pick the video/audio type with `MediaRecorder.isTypeSupported`. Stop
+  all camera and mic tracks as soon as recording ends.
 - Guard against double taps.
 
 ## How to work

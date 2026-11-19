@@ -313,6 +313,14 @@
       cursor: pointer;
     }
 
+    .log-video {
+      grid-column: 1 / -1;
+      width: 100%;
+      max-height: 340px;
+      border-radius: 18px;
+      background: #2d2623;
+    }
+
     @keyframes warm-bounce {
       0% { transform: scale(0.88); }
       58% { transform: scale(1.08); }
@@ -404,6 +412,10 @@
       const OLD_PHOTO_STORE_NAMES = ["faceImages", "faceImageVersions"];
       const THANK_YOU_DURATION_MS = 2400;
       const RECORDING_LIMIT_MS = 10000;
+      // About 0.6 Mbit/s keeps a 10-second video near 1 MB, which is plenty
+      // for a face on a phone and gentle on Safari's storage quota.
+      const VIDEO_BITS_PER_SECOND = 600000;
+      const AUDIO_BITS_PER_SECOND = 64000;
       const STORAGE_TIMEOUT_MS = 2500;
 
       const childView = document.querySelector("#childView");
@@ -429,7 +441,7 @@
       let activeRecording = null;
       let resetTimer = null;
       let logRenderToken = 0;
-      let audioPlayers = [];
+      let mediaPlayers = [];
 
       function logError(message, error) {
         // Technical details belong in developer tools, never in the child's UI.
@@ -555,7 +567,9 @@
         });
       }
 
-      function updateRecordWithAudio(database, id, audio, audioType) {
+      // clipFields is either { video, videoType } or { audio, audioType },
+      // depending on whether the camera was available.
+      function updateRecordWithClip(database, id, clipFields) {
         return new Promise((resolve, reject) => {
           const transaction = database.transaction(CHECKINS_STORE_NAME, "readwrite");
           const store = transaction.objectStore(CHECKINS_STORE_NAME);
@@ -570,17 +584,16 @@
               return;
             }
 
-            record.audio = audio;
-            record.audioType = audioType;
+            Object.assign(record, clipFields);
             store.put(record);
           };
 
           transaction.oncomplete = () => resolve();
           transaction.onerror = () => {
-            reject(operationError || transaction.error || new Error("Could not attach audio"));
+            reject(operationError || transaction.error || new Error("Could not attach the clip"));
           };
           transaction.onabort = () => {
-            reject(operationError || transaction.error || new Error("Audio transaction was aborted"));
+            reject(operationError || transaction.error || new Error("Clip transaction was aborted"));
           };
         });
       }
@@ -613,7 +626,9 @@
               face,
               timestamp,
               audio: null,
-              audioType: null
+              audioType: null,
+              video: null,
+              videoType: null
             }),
             "Saving the check-in"
           );
@@ -623,20 +638,20 @@
         }
       }
 
-      async function attachAudio(id, audio, audioType) {
+      async function attachClip(id, clipFields) {
         if (id === null) {
-          logError("The voice clip could not be attached because the sad check-in was not saved.", new Error("Missing check-in id"));
+          logError("The clip could not be attached because the sad check-in was not saved.", new Error("Missing check-in id"));
           return;
         }
 
         try {
           const database = await finishWithin(openDatabase(), "Opening storage");
           await finishWithin(
-            updateRecordWithAudio(database, id, audio, audioType),
-            "Attaching the voice clip"
+            updateRecordWithClip(database, id, clipFields),
+            "Attaching the clip"
           );
         } catch (error) {
-          logError("The voice clip could not be attached.", error);
+          logError("The clip could not be attached.", error);
         }
       }
 
@@ -727,34 +742,64 @@
         showFaceScreen();
       }
 
-      function preferredAudioType() {
-        // Safari on iOS normally selects MP4. Other candidates keep local
-        // desktop testing useful without assuming every browser records WebM.
-        const candidates = [
-          "audio/mp4",
-          "audio/mp4;codecs=mp4a.40.2",
-          "audio/webm;codecs=opus",
-          "audio/webm",
-          "audio/ogg;codecs=opus"
-        ];
+      function preferredClipType(isVideo) {
+        // Safari on iOS normally selects MP4 for both video and audio. The
+        // WebM/Ogg candidates keep desktop testing useful.
+        const candidates = isVideo
+          ? [
+              "video/mp4",
+              "video/mp4;codecs=avc1,mp4a.40.2",
+              "video/webm;codecs=vp8,opus",
+              "video/webm"
+            ]
+          : [
+              "audio/mp4",
+              "audio/mp4;codecs=mp4a.40.2",
+              "audio/webm;codecs=opus",
+              "audio/webm",
+              "audio/ogg;codecs=opus"
+            ];
 
         return candidates.find((type) => window.MediaRecorder.isTypeSupported(type)) || "";
       }
 
-      function releaseMicrophone(stream) {
+      async function getCameraAndMic() {
+        // Ask for the front ("user") camera at a small size plus the mic.
+        // "ideal" means "close to this if you can", so the request never
+        // fails just because the camera can't do exactly 640x480.
+        try {
+          return await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: "user",
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            },
+            audio: true
+          });
+        } catch (error) {
+          // Camera denied or missing: still capture his voice rather than
+          // losing the clip entirely.
+          logError("The camera could not start; recording audio only.", error);
+          return navigator.mediaDevices.getUserMedia({ audio: true });
+        }
+      }
+
+      function releaseCameraAndMic(stream) {
         if (!stream) return;
         stream.getTracks().forEach((track) => track.stop());
       }
 
-      function createRecorder(stream, audioType) {
-        if (!audioType) return new MediaRecorder(stream);
+      function createRecorder(stream, clipType, isVideo) {
+        const options = { audioBitsPerSecond: AUDIO_BITS_PER_SECOND };
+        if (isVideo) options.videoBitsPerSecond = VIDEO_BITS_PER_SECOND;
+        if (clipType) options.mimeType = clipType;
 
         try {
-          return new MediaRecorder(stream, { mimeType: audioType });
+          return new MediaRecorder(stream, options);
         } catch (error) {
           // A browser can occasionally claim support but reject the explicit
-          // option. Its default is safer than losing the recording completely.
-          logError("The preferred audio type could not be used; using the browser default.", error);
+          // options. Its default is safer than losing the recording completely.
+          logError("The preferred recording options could not be used; using the browser default.", error);
           return new MediaRecorder(stream);
         }
       }
@@ -765,18 +810,21 @@
         voiceStepFinished = true;
         allDoneButton.disabled = true;
         window.clearTimeout(session.stopTimer);
-        releaseMicrophone(session.stream);
+        releaseCameraAndMic(session.stream);
         activeRecording = null;
         listeningIndicator.classList.remove("is-visible");
 
         if (shouldAttachAudio && session.chunks.length > 0) {
-          const audioType = session.recorder.mimeType || session.audioType || session.chunks[0].type || "";
-          const audio = new Blob(session.chunks, audioType ? { type: audioType } : undefined);
+          const clipType = session.recorder.mimeType || session.clipType || session.chunks[0].type || "";
+          const clip = new Blob(session.chunks, clipType ? { type: clipType } : undefined);
 
-          if (audio.size > 0) {
-            await attachAudio(currentSadCheckInId, audio, audioType || null);
+          if (clip.size > 0) {
+            const clipFields = session.isVideo
+              ? { video: clip, videoType: clipType || null }
+              : { audio: clip, audioType: clipType || null };
+            await attachClip(currentSadCheckInId, clipFields);
           } else {
-            logError("The recorded voice clip was empty.", new Error("Empty audio Blob"));
+            logError("The recorded clip was empty.", new Error("Empty clip Blob"));
           }
         } else if (shouldAttachAudio) {
           logError("The recorder returned no audio data.", new Error("No MediaRecorder chunks"));
@@ -801,13 +849,13 @@
             session.recorder.stop();
             // Stop every track immediately after requesting the final chunk so
             // iOS releases the orange microphone indicator without delay.
-            releaseMicrophone(session.stream);
+            releaseCameraAndMic(session.stream);
           } else {
             void completeRecording(session, true);
           }
         } catch (error) {
           logError("Recording could not be stopped normally.", error);
-          releaseMicrophone(session.stream);
+          releaseCameraAndMic(session.stream);
           void completeRecording(session, false);
         }
       }
@@ -826,24 +874,27 @@
             throw new Error("MediaRecorder is unavailable");
           }
 
-          // No tap is needed here: iOS Safari asks for microphone permission
-          // per site, not per tap. If permission is set to Allow for this
-          // site, the mic simply turns on (the orange dot appears).
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          // No tap is needed here: iOS Safari asks for camera and microphone
+          // permission per site, not per tap. If both are set to Allow for
+          // this site, they simply turn on (the green dot appears). The
+          // stream is never shown on screen; it goes only to the recorder.
+          stream = await getCameraAndMic();
 
-          // The permission prompt or mic start can take a moment. If he tapped
-          // All done meanwhile, turn the mic straight back off.
+          // The permission prompt or camera start can take a moment. If he
+          // tapped All done meanwhile, turn everything straight back off.
           if (!isStillThisSadScreen(sessionNumber)) {
-            releaseMicrophone(stream);
+            releaseCameraAndMic(stream);
             return;
           }
 
-          const audioType = preferredAudioType();
-          const recorder = createRecorder(stream, audioType);
+          const isVideo = stream.getVideoTracks().length > 0;
+          const clipType = preferredClipType(isVideo);
+          const recorder = createRecorder(stream, clipType, isVideo);
           const session = {
             recorder,
             stream,
-            audioType,
+            clipType,
+            isVideo,
             chunks: [],
             stopTimer: null,
             finalized: false
@@ -863,7 +914,7 @@
 
           recorder.onerror = (event) => {
             logError("MediaRecorder reported an error.", event.error || event);
-            releaseMicrophone(session.stream);
+            releaseCameraAndMic(session.stream);
             void completeRecording(session, false);
           };
 
@@ -874,7 +925,7 @@
           // audio without giving the child a countdown or time pressure.
           session.stopTimer = window.setTimeout(requestRecordingStop, RECORDING_LIMIT_MS);
         } catch (error) {
-          releaseMicrophone(stream);
+          releaseCameraAndMic(stream);
           logError("Microphone permission was denied or recording could not start.", error);
           // Same warm ending as always; his sad check-in is already saved.
           if (isStillThisSadScreen(sessionNumber)) {
@@ -909,12 +960,14 @@
         return `${year}-${month}-${day}`;
       }
 
-      function cleanUpAudioPlayers() {
-        audioPlayers.forEach(({ audio, url }) => {
-          audio.pause();
+      function cleanUpMediaPlayers() {
+        // Pausing and revoking each object URL frees the Blob copy the
+        // browser made for playback. Works the same for audio and video.
+        mediaPlayers.forEach(({ media, url }) => {
+          media.pause();
           URL.revokeObjectURL(url);
         });
-        audioPlayers = [];
+        mediaPlayers = [];
       }
 
       function makePlayButton(record) {
@@ -927,8 +980,8 @@
         const url = URL.createObjectURL(record.audio);
         const audio = new Audio(url);
         audio.preload = "metadata";
-        const player = { audio, url, button };
-        audioPlayers.push(player);
+        const player = { media: audio, url, button };
+        mediaPlayers.push(player);
 
         function resetButton() {
           button.textContent = "▶ Play";
@@ -945,10 +998,10 @@
             return;
           }
 
-          audioPlayers.forEach((otherPlayer) => {
+          mediaPlayers.forEach((otherPlayer) => {
             if (otherPlayer !== player) {
-              otherPlayer.audio.pause();
-              otherPlayer.audio.currentTime = 0;
+              otherPlayer.media.pause();
+              otherPlayer.media.currentTime = 0;
             }
           });
 
@@ -963,6 +1016,21 @@
         });
 
         return button;
+      }
+
+      function makeVideoPlayer(record) {
+        // A <video> element with built-in controls. playsinline keeps iOS
+        // from jumping to full screen the moment you press play.
+        const url = URL.createObjectURL(record.video);
+        const video = document.createElement("video");
+        video.className = "log-video";
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.src = url;
+        video.setAttribute("aria-label", "Video clip");
+        mediaPlayers.push({ media: video, url });
+        return video;
       }
 
       function renderRecords(records) {
@@ -1031,7 +1099,9 @@
             }).format(date);
 
             item.append(face, time);
-            if (record.audio instanceof Blob && record.audio.size > 0) {
+            if (record.video instanceof Blob && record.video.size > 0) {
+              item.append(makeVideoPlayer(record));
+            } else if (record.audio instanceof Blob && record.audio.size > 0) {
               item.append(makePlayButton(record));
             }
             list.append(item);
@@ -1044,7 +1114,7 @@
 
       async function renderLog() {
         const token = ++logRenderToken;
-        cleanUpAudioPlayers();
+        cleanUpMediaPlayers();
 
         const loading = document.createElement("p");
         loading.className = "log-loading";
@@ -1066,7 +1136,7 @@
           void renderLog();
         } else {
           ++logRenderToken;
-          cleanUpAudioPlayers();
+          cleanUpMediaPlayers();
         }
       }
 
@@ -1074,9 +1144,9 @@
       allDoneButton.addEventListener("click", handleAllDone);
       window.addEventListener("hashchange", renderRoute);
       window.addEventListener("pagehide", () => {
-        cleanUpAudioPlayers();
+        cleanUpMediaPlayers();
         if (activeRecording) {
-          releaseMicrophone(activeRecording.stream);
+          releaseCameraAndMic(activeRecording.stream);
         }
       });
 

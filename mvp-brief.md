@@ -38,15 +38,19 @@ As my son, I want to tap a face so I can say how I feel without words.
 - THE SYSTEM SHALL then show a friendly thank-you and return to the
   three-face screen after a few seconds.
 
-### 3. Sad, with a voice clip
-As my son, when I'm sad I can say why without tapping anything else.
+### 3. Sad, with a video clip
+As my son, when I'm sad I can show and tell why without tapping anything else.
 
 - WHEN sad is tapped THE SYSTEM SHALL immediately save a check-in with the
   face and timestamp, before anything else happens. The check-in must
   never depend on the recording.
 - THE SYSTEM SHALL then show the 😢 emoji large, with no question text and
-  no speech, and SHALL start recording automatically. He does not need to
-  tap anything to start.
+  no speech, and SHALL start recording video (front camera plus
+  microphone) automatically. He does not need to tap anything to start.
+  He does not see himself on screen; the camera feed goes only to the
+  recorder.
+- IF the camera is unavailable or not allowed, THE SYSTEM SHALL record
+  audio only instead.
 - A calm listening indicator shows while recording. No countdown.
 - Below the emoji, one big 💛 "All done" button. Tapping it stops the
   recording early and keeps what he has said so far.
@@ -55,9 +59,9 @@ As my son, when I'm sad I can say why without tapping anything else.
 - WHEN recording stops THE SYSTEM SHALL attach the clip to the sad check-in
   that was already saved, show the warm thank-you, and return to the
   faces.
-- For the mic to start without a permission popup, the parent sets
-  Microphone to Allow for this site in Safari's Website Settings on his
-  phone.
+- For recording to start without a permission popup, the parent sets
+  Camera and Microphone to Allow for this site in Safari's Website
+  Settings on his phone.
 
 ### 4. Things going wrong, gracefully
 - IF microphone permission is denied or recording fails THEN THE SYSTEM
@@ -72,7 +76,8 @@ As the parent, I want to see his check-ins and play clips on his phone.
 - THE SYSTEM SHALL provide a log view at the same page with `#log` in the
   URL. There is no link to it from his screen.
 - The log SHALL list check-ins newest first, grouped by day, showing the
-  face, the time, and a play button when a clip exists.
+  face, the time, and a video player or audio play button when a clip
+  exists.
 - The log is read-only in this MVP: no delete, no export, no charts, no
   summaries, no counts or streaks.
 
@@ -82,11 +87,16 @@ As the parent, I want to see his check-ins and play clips on his phone.
   fonts, or CDNs.
 - Storage: IndexedDB in the browser. One object store for check-ins:
   `{ id, face: "happy" | "neutral" | "sad", timestamp (ISO 8601),
-  audio: Blob | null, audioType: string | null }`.
-- Audio: `navigator.mediaDevices.getUserMedia` + `MediaRecorder`. iOS
-  Safari records `audio/mp4`; pick the type with
-  `MediaRecorder.isTypeSupported` rather than hard-coding `audio/webm`.
-  Release the microphone (stop all tracks) as soon as recording ends.
+  audio: Blob | null, audioType: string | null,
+  video: Blob | null, videoType: string | null }`. A sad check-in has at
+  most one clip: video normally, audio when the camera was unavailable.
+  Check-ins from before video only have audio fields.
+- Video and audio: `navigator.mediaDevices.getUserMedia` +
+  `MediaRecorder`. iOS Safari records `video/mp4` and `audio/mp4`; pick
+  the type with `MediaRecorder.isTypeSupported` rather than hard-coding
+  WebM. Keep video small (about 640x480, about 1 MB per 10 seconds).
+  Release the camera and microphone (stop all tracks) as soon as
+  recording ends.
 - Must work in current iOS Safari on iPhone. Portrait layout, safe-area
   insets respected, no horizontal scrolling, no zoom on tap.
 - Must be served over HTTPS (microphone requires a secure context).
@@ -102,7 +112,8 @@ As the parent, I want to see his check-ins and play clips on his phone.
 - Nothing leaves the device. No network requests after the page loads: no
   analytics, no logging services, no fonts, no APIs, no cloud storage.
 - No accounts, no login, no cookies, no identifiers.
-- Recordings live only in this browser's IndexedDB on his phone.
+- Recordings (video and audio) live only in this browser's IndexedDB on
+  his phone.
 
 ## Explicitly out of scope (do not add, do not decide)
 These are open questions I'm deciding separately. Do not implement or
