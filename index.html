@@ -73,7 +73,6 @@
     }
 
     .question,
-    .voice-title,
     .thanks-title {
       margin-bottom: clamp(24px, 7vh, 54px);
       font-size: clamp(2rem, 9vw, 3.4rem);
@@ -128,15 +127,6 @@
       filter: saturate(0.92);
     }
 
-    .face-photo {
-      width: min(26vw, 142px);
-      aspect-ratio: 1;
-      display: block;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 5px 14px rgba(61, 45, 36, 0.2);
-    }
-
     .tap-response {
       min-height: 2.1em;
       margin: clamp(18px, 5vh, 36px) 12px 0;
@@ -152,16 +142,19 @@
       opacity: 1;
     }
 
-    .voice-title {
+    /* The big sad face replaces the old written question, so the screen
+       makes sense without reading. */
+    .voice-face {
+      display: block;
       margin-bottom: clamp(22px, 6vh, 44px);
+      font-size: clamp(5rem, 26vw, 8.5rem);
+      line-height: 1;
     }
 
     .voice-actions {
-      width: min(94vw, 500px);
+      width: min(62vw, 260px);
       margin-inline: auto;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(12px, 4vw, 22px);
     }
 
     .choice-button {
@@ -231,8 +224,7 @@
       color: #3d6f66;
     }
 
-    .log-view,
-    .face-setup-view {
+    .log-view {
       width: min(100%, 760px);
       min-height: 100vh;
       min-height: 100dvh;
@@ -304,15 +296,6 @@
       line-height: 1;
     }
 
-    .log-face-photo {
-      width: 54px;
-      height: 54px;
-      display: block;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 3px 9px rgba(61, 45, 36, 0.18);
-    }
-
     .log-time {
       font-size: 1.08rem;
       font-weight: 700;
@@ -330,131 +313,12 @@
       cursor: pointer;
     }
 
-    .setup-title {
-      margin-bottom: 10px;
-      font-size: clamp(2rem, 8vw, 3rem);
-      letter-spacing: -0.035em;
-    }
-
-    .setup-intro {
-      max-width: 610px;
-      margin-bottom: 26px;
-      color: #635650;
-      font-size: 1.08rem;
-      line-height: 1.5;
-    }
-
-    .setup-grid {
-      display: grid;
-      gap: 18px;
-    }
-
-    .setup-card {
-      padding: 18px;
-      display: grid;
-      grid-template-columns: 104px minmax(0, 1fr);
-      align-items: center;
-      gap: 18px;
-      border: 1px solid rgba(82, 65, 57, 0.13);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.88);
-      box-shadow: 0 10px 25px rgba(91, 67, 49, 0.1);
-    }
-
-    .setup-preview {
-      width: 104px;
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      border-radius: 50%;
-      background: #fff8ed;
-      font-size: 4.6rem;
-      line-height: 1;
-    }
-
-    .setup-preview-photo {
+    .log-video {
+      grid-column: 1 / -1;
       width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-    }
-
-    .setup-card-title {
-      margin-bottom: 12px;
-      font-size: 1.35rem;
-    }
-
-    .setup-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .photo-picker,
-    .default-button {
-      min-height: 50px;
-      padding: 10px 12px;
-      display: grid;
-      place-items: center;
-      border: 2px solid #9bbdb6;
-      border-radius: 16px;
-      background: #eff8f5;
-      color: #315e57;
-      font-weight: 800;
-      line-height: 1.15;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .default-button {
-      border-color: #d5c4b6;
-      background: #fffaf3;
-      color: #635650;
-    }
-
-    .default-button:disabled {
-      cursor: default;
-      opacity: 0.5;
-    }
-
-    .file-input {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
-
-    .file-input:focus-visible + .photo-picker {
-      outline: 4px solid #246b64;
-      outline-offset: 4px;
-    }
-
-    .setup-status {
-      min-height: 1.5em;
-      margin: 22px 4px 0;
-      color: #3d6f66;
-      font-weight: 700;
-    }
-
-    @media (max-width: 430px) {
-      .setup-card {
-        grid-template-columns: 82px minmax(0, 1fr);
-        gap: 14px;
-        padding: 14px;
-      }
-
-      .setup-preview {
-        width: 82px;
-        font-size: 3.6rem;
-      }
-
-      .setup-actions {
-        grid-template-columns: 1fr;
-      }
+      max-height: 340px;
+      border-radius: 18px;
+      background: #2d2623;
     }
 
     @keyframes warm-bounce {
@@ -487,36 +351,29 @@
       <div class="face-grid">
         <button class="face-button" type="button" data-face="happy" aria-label="Happy">
           <span class="face" aria-hidden="true">
-            <span class="face-emoji" data-face-fallback="happy">😊</span>
-            <img class="face-photo" data-face-photo="happy" alt="" hidden>
+            <span class="face-emoji">😊</span>
           </span>
         </button>
         <button class="face-button" type="button" data-face="neutral" aria-label="Neutral">
           <span class="face" aria-hidden="true">
-            <span class="face-emoji" data-face-fallback="neutral">😐</span>
-            <img class="face-photo" data-face-photo="neutral" alt="" hidden>
+            <span class="face-emoji">😐</span>
           </span>
         </button>
         <button class="face-button" type="button" data-face="sad" aria-label="Sad">
           <span class="face" aria-hidden="true">
-            <span class="face-emoji" data-face-fallback="sad">😢</span>
-            <img class="face-photo" data-face-photo="sad" alt="" hidden>
+            <span class="face-emoji">😢</span>
           </span>
         </button>
       </div>
       <p id="tapResponse" class="tap-response" aria-live="polite"></p>
     </section>
 
-    <section id="voicePanel" class="panel" aria-labelledby="voiceTitle" hidden>
-      <h1 id="voiceTitle" class="voice-title">Tell us why you’re sad</h1>
+    <section id="voicePanel" class="panel" aria-labelledby="voiceFace" hidden>
+      <span id="voiceFace" class="voice-face" role="img" aria-label="Sad">😢</span>
       <div class="voice-actions">
-        <button id="recordButton" class="choice-button" type="button" aria-label="Record a voice clip">
-          <span class="choice-icon" aria-hidden="true">🎙️</span>
-          <span id="recordButtonText">Record</span>
-        </button>
-        <button id="noThanksButton" class="choice-button" type="button">
+        <button id="allDoneButton" class="choice-button" type="button">
           <span class="choice-icon" aria-hidden="true">💛</span>
-          No thanks
+          All done
         </button>
       </div>
       <div id="listeningIndicator" class="listening" role="status" aria-live="polite">
@@ -538,79 +395,28 @@
     </div>
   </main>
 
-  <main id="faceSetupView" class="face-setup-view" hidden>
-    <h1 class="setup-title">Your face photos</h1>
-    <p class="setup-intro">
-      Take or choose one photo for each feeling. Photos are cropped on this
-      device and stay in this browser only.
-    </p>
-    <div class="setup-grid">
-      <section class="setup-card" aria-labelledby="happySetupTitle">
-        <div class="setup-preview" aria-hidden="true">
-          <span data-face-fallback="happy">😊</span>
-          <img class="setup-preview-photo" data-face-photo="happy" alt="" hidden>
-        </div>
-        <div>
-          <h2 id="happySetupTitle" class="setup-card-title">Happy</h2>
-          <div class="setup-actions">
-            <input id="happyPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="happy">
-            <label class="photo-picker" for="happyPhotoInput">Take or choose photo</label>
-            <button class="default-button" type="button" data-reset-face="happy" disabled>Use emoji</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="setup-card" aria-labelledby="neutralSetupTitle">
-        <div class="setup-preview" aria-hidden="true">
-          <span data-face-fallback="neutral">😐</span>
-          <img class="setup-preview-photo" data-face-photo="neutral" alt="" hidden>
-        </div>
-        <div>
-          <h2 id="neutralSetupTitle" class="setup-card-title">Neutral</h2>
-          <div class="setup-actions">
-            <input id="neutralPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="neutral">
-            <label class="photo-picker" for="neutralPhotoInput">Take or choose photo</label>
-            <button class="default-button" type="button" data-reset-face="neutral" disabled>Use emoji</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="setup-card" aria-labelledby="sadSetupTitle">
-        <div class="setup-preview" aria-hidden="true">
-          <span data-face-fallback="sad">😢</span>
-          <img class="setup-preview-photo" data-face-photo="sad" alt="" hidden>
-        </div>
-        <div>
-          <h2 id="sadSetupTitle" class="setup-card-title">Sad</h2>
-          <div class="setup-actions">
-            <input id="sadPhotoInput" class="file-input" type="file" accept="image/jpeg,image/png" data-face-image-input="sad">
-            <label class="photo-picker" for="sadPhotoInput">Take or choose photo</label>
-            <button class="default-button" type="button" data-reset-face="sad" disabled>Use emoji</button>
-          </div>
-        </div>
-      </section>
-    </div>
-    <p id="faceSetupStatus" class="setup-status" role="status" aria-live="polite"></p>
-  </main>
-
   <script>
     (() => {
       "use strict";
 
       const DATABASE_NAME = "feelings-checkin";
-      const DATABASE_VERSION = 3;
+      // Bumping the version is the only way IndexedDB lets us change which
+      // object stores exist: the browser then runs onupgradeneeded once.
+      // Version 5 (not 4) because recovery.html may already have upgraded his
+      // database to 4. Opening with a lower number than the database has
+      // fails outright, which would quietly stop check-ins from saving.
+      const DATABASE_VERSION = 5;
       const CHECKINS_STORE_NAME = "checkins";
-      const FACE_IMAGES_STORE_NAME = "faceImages";
-      const FACE_IMAGE_VERSIONS_STORE_NAME = "faceImageVersions";
+      // Old stores from the removed custom-photo feature (v1.0). They are
+      // deleted during the upgrade below; nothing reads or writes them now.
+      const OLD_PHOTO_STORE_NAMES = ["faceImages", "faceImageVersions"];
       const THANK_YOU_DURATION_MS = 2400;
       const RECORDING_LIMIT_MS = 10000;
+      // About 0.6 Mbit/s keeps a 10-second video near 1 MB, which is plenty
+      // for a face on a phone and gentle on Safari's storage quota.
+      const VIDEO_BITS_PER_SECOND = 600000;
+      const AUDIO_BITS_PER_SECOND = 64000;
       const STORAGE_TIMEOUT_MS = 2500;
-      const PHOTO_STORAGE_TIMEOUT_MS = 15000;
-      const FACE_LABELS = {
-        happy: "Happy",
-        neutral: "Neutral",
-        sad: "Sad"
-      };
 
       const childView = document.querySelector("#childView");
       const checkinPanel = document.querySelector("#checkinPanel");
@@ -618,31 +424,24 @@
       const thanksPanel = document.querySelector("#thanksPanel");
       const faceButtons = Array.from(document.querySelectorAll(".face-button"));
       const tapResponse = document.querySelector("#tapResponse");
-      const recordButton = document.querySelector("#recordButton");
-      const recordButtonText = document.querySelector("#recordButtonText");
-      const noThanksButton = document.querySelector("#noThanksButton");
+      const allDoneButton = document.querySelector("#allDoneButton");
       const listeningIndicator = document.querySelector("#listeningIndicator");
       const logView = document.querySelector("#logView");
       const logContent = document.querySelector("#logContent");
-      const faceSetupView = document.querySelector("#faceSetupView");
-      const faceSetupStatus = document.querySelector("#faceSetupStatus");
-      const faceImageInputs = Array.from(document.querySelectorAll("[data-face-image-input]"));
-      const resetFaceButtons = Array.from(document.querySelectorAll("[data-reset-face]"));
 
       let databasePromise = null;
       let faceTapLocked = false;
-      let voiceChoiceLocked = false;
+      // True once the sad screen is finishing (All done tapped, 10 seconds
+      // up, or the mic failed). Stops a second tap from doing anything.
+      let voiceStepFinished = false;
+      // Counts sad screens. A slow microphone start can only belong to the
+      // sad screen that asked for it, never to a later one.
+      let voiceSessionNumber = 0;
       let currentSadCheckInId = null;
       let activeRecording = null;
       let resetTimer = null;
       let logRenderToken = 0;
-      let audioPlayers = [];
-      let faceImagesReady = null;
-      let lastFaceImageSaveError = null;
-      let databaseUpgradeBlocked = false;
-      const faceImageUrls = new Map();
-      const faceImageVersionIds = new Map();
-      const logFaceImageUrls = new Map();
+      let mediaPlayers = [];
 
       function logError(message, error) {
         // Technical details belong in developer tools, never in the child's UI.
@@ -702,54 +501,18 @@
               });
             }
 
-            if (!database.objectStoreNames.contains(FACE_IMAGES_STORE_NAME)) {
-              // Face photos have a different lifecycle from check-ins, so a
-              // separate store lets a parent replace them without touching the
-              // child's history. The image Blob still never leaves IndexedDB.
-              database.createObjectStore(FACE_IMAGES_STORE_NAME, {
-                keyPath: "face"
-              });
-            }
-
-            if (!database.objectStoreNames.contains(FACE_IMAGE_VERSIONS_STORE_NAME)) {
-              // Each saved photo version gets its own local id. A check-in can
-              // reference that id without copying the same Blob into every row.
-              const versionStore = database.createObjectStore(FACE_IMAGE_VERSIONS_STORE_NAME, {
-                keyPath: "id",
-                autoIncrement: true
-              });
-              const currentStore = request.transaction.objectStore(FACE_IMAGES_STORE_NAME);
-              const cursorRequest = currentStore.openCursor();
-
-              // Version 2 stored only the current photo. Preserve that photo as
-              // the first version so future check-ins can snapshot it without
-              // asking the parent to upload it again.
-              cursorRequest.onsuccess = () => {
-                const cursor = cursorRequest.result;
-                if (!cursor) return;
-
-                const record = cursor.value;
-                if (record.image instanceof Blob && record.versionId === undefined) {
-                  const versionRequest = versionStore.add({
-                    face: record.face,
-                    image: record.image,
-                    createdAt: record.updatedAt || new Date().toISOString()
-                  });
-                  versionRequest.onsuccess = () => {
-                    record.versionId = versionRequest.result;
-                    const updateRequest = cursor.update(record);
-                    updateRequest.onsuccess = () => cursor.continue();
-                  };
-                  return;
-                }
-
-                cursor.continue();
-              };
-            }
+            // Remove the photo stores if this phone still has them. Deleting
+            // a store also deletes its photos. Check-ins live in their own
+            // store, so they are untouched. Some old check-ins still carry a
+            // faceImageVersionId field; it is simply ignored now.
+            OLD_PHOTO_STORE_NAMES.forEach((storeName) => {
+              if (database.objectStoreNames.contains(storeName)) {
+                database.deleteObjectStore(storeName);
+              }
+            });
           };
 
           request.onsuccess = () => {
-            databaseUpgradeBlocked = false;
             if (settled) {
               request.result.close();
               return;
@@ -772,7 +535,6 @@
 
           request.onblocked = () => {
             if (settled) return;
-            databaseUpgradeBlocked = true;
             settled = true;
             reject(makeDatabaseBlockedError());
           };
@@ -805,7 +567,9 @@
         });
       }
 
-      function updateRecordWithAudio(database, id, audio, audioType) {
+      // clipFields is either { video, videoType } or { audio, audioType },
+      // depending on whether the camera was available.
+      function updateRecordWithClip(database, id, clipFields) {
         return new Promise((resolve, reject) => {
           const transaction = database.transaction(CHECKINS_STORE_NAME, "readwrite");
           const store = transaction.objectStore(CHECKINS_STORE_NAME);
@@ -820,17 +584,16 @@
               return;
             }
 
-            record.audio = audio;
-            record.audioType = audioType;
+            Object.assign(record, clipFields);
             store.put(record);
           };
 
           transaction.oncomplete = () => resolve();
           transaction.onerror = () => {
-            reject(operationError || transaction.error || new Error("Could not attach audio"));
+            reject(operationError || transaction.error || new Error("Could not attach the clip"));
           };
           transaction.onabort = () => {
-            reject(operationError || transaction.error || new Error("Audio transaction was aborted"));
+            reject(operationError || transaction.error || new Error("Clip transaction was aborted"));
           };
         });
       }
@@ -855,89 +618,7 @@
         });
       }
 
-      function putFaceImageRecord(database, face, image) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(
-            [FACE_IMAGES_STORE_NAME, FACE_IMAGE_VERSIONS_STORE_NAME],
-            "readwrite"
-          );
-          const currentStore = transaction.objectStore(FACE_IMAGES_STORE_NAME);
-          const versionStore = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME);
-          const updatedAt = new Date().toISOString();
-          const versionRequest = versionStore.add({ face, image, createdAt: updatedAt });
-          let versionId = null;
-
-          versionRequest.onsuccess = () => {
-            versionId = versionRequest.result;
-            currentStore.put({ face, image, updatedAt, versionId });
-          };
-
-          // Both writes share one transaction: a photo cannot become current
-          // unless its immutable history version was also saved successfully.
-          transaction.oncomplete = () => resolve(versionId);
-          transaction.onerror = () => {
-            reject(transaction.error || versionRequest.error || new Error("Could not save the face photo"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || versionRequest.error || new Error("Face photo transaction was aborted"));
-          };
-        });
-      }
-
-      function deleteFaceImageRecord(database, face) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readwrite");
-          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).delete(face);
-
-          transaction.oncomplete = () => resolve();
-          transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not remove the face photo"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo transaction was aborted"));
-          };
-        });
-      }
-
-      function readAllFaceImages(database) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGES_STORE_NAME, "readonly");
-          const request = transaction.objectStore(FACE_IMAGES_STORE_NAME).getAll();
-          let records = [];
-
-          request.onsuccess = () => {
-            records = request.result;
-          };
-          transaction.oncomplete = () => resolve(records);
-          transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not read face photos"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo read was aborted"));
-          };
-        });
-      }
-
-      function readAllFaceImageVersions(database) {
-        return new Promise((resolve, reject) => {
-          const transaction = database.transaction(FACE_IMAGE_VERSIONS_STORE_NAME, "readonly");
-          const request = transaction.objectStore(FACE_IMAGE_VERSIONS_STORE_NAME).getAll();
-          let records = [];
-
-          request.onsuccess = () => {
-            records = request.result;
-          };
-          transaction.oncomplete = () => resolve(records);
-          transaction.onerror = () => {
-            reject(transaction.error || request.error || new Error("Could not read face photo history"));
-          };
-          transaction.onabort = () => {
-            reject(transaction.error || request.error || new Error("Face photo history read was aborted"));
-          };
-        });
-      }
-
-      async function saveCheckIn(face, timestamp, faceImageVersionId) {
+      async function saveCheckIn(face, timestamp) {
         try {
           const database = await finishWithin(openDatabase(), "Opening storage");
           return await finishWithin(
@@ -946,7 +627,8 @@
               timestamp,
               audio: null,
               audioType: null,
-              faceImageVersionId
+              video: null,
+              videoType: null
             }),
             "Saving the check-in"
           );
@@ -956,20 +638,20 @@
         }
       }
 
-      async function attachAudio(id, audio, audioType) {
+      async function attachClip(id, clipFields) {
         if (id === null) {
-          logError("The voice clip could not be attached because the sad check-in was not saved.", new Error("Missing check-in id"));
+          logError("The clip could not be attached because the sad check-in was not saved.", new Error("Missing check-in id"));
           return;
         }
 
         try {
           const database = await finishWithin(openDatabase(), "Opening storage");
           await finishWithin(
-            updateRecordWithAudio(database, id, audio, audioType),
-            "Attaching the voice clip"
+            updateRecordWithClip(database, id, clipFields),
+            "Attaching the clip"
           );
         } catch (error) {
-          logError("The voice clip could not be attached.", error);
+          logError("The clip could not be attached.", error);
         }
       }
 
@@ -980,304 +662,6 @@
         } catch (error) {
           logError("The check-in log could not be read.", error);
           return [];
-        }
-      }
-
-      async function saveFaceImage(face, image) {
-        lastFaceImageSaveError = null;
-        if (databaseUpgradeBlocked) {
-          lastFaceImageSaveError = makeDatabaseBlockedError();
-          logError("The face photo could not be saved.", lastFaceImageSaveError);
-          return null;
-        }
-
-        try {
-          // Parent setup can wait longer than the child's one-tap flow. iOS may
-          // need several seconds to finish a database upgrade or write a photo.
-          const database = await finishWithin(
-            openDatabase(),
-            "Opening storage",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-          return await finishWithin(
-            putFaceImageRecord(database, face, image),
-            "Saving the face photo",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-        } catch (error) {
-          lastFaceImageSaveError = error;
-          logError("The face photo could not be saved.", error);
-          return null;
-        }
-      }
-
-      function faceImageSaveMessage(error) {
-        if (
-          databaseUpgradeBlocked ||
-          (error && (error.code === "database-blocked" || error.message.includes("blocked")))
-        ) {
-          return "Close other Feelings Check-in tabs, reload this page, and try again.";
-        }
-        if (error && error.name === "QuotaExceededError") {
-          return "Safari does not have enough local storage for that photo.";
-        }
-        return "That photo couldn’t be saved. Reload this page and try again.";
-      }
-
-      async function removeFaceImage(face) {
-        try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
-          await finishWithin(
-            deleteFaceImageRecord(database, face),
-            "Removing the face photo"
-          );
-          return true;
-        } catch (error) {
-          logError("The face photo could not be removed.", error);
-          return false;
-        }
-      }
-
-      async function getFaceImages() {
-        try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
-          return await finishWithin(readAllFaceImages(database), "Reading face photos");
-        } catch (error) {
-          logError("The face photos could not be read.", error);
-          return [];
-        }
-      }
-
-      async function getFaceImageVersions() {
-        try {
-          const database = await finishWithin(openDatabase(), "Opening storage");
-          return await finishWithin(
-            readAllFaceImageVersions(database),
-            "Reading face photo history"
-          );
-        } catch (error) {
-          logError("The face photo history could not be read.", error);
-          return [];
-        }
-      }
-
-      function displayFaceImage(face, image, versionId = null) {
-        const oldUrl = faceImageUrls.get(face);
-        const photoElements = document.querySelectorAll(`[data-face-photo="${face}"]`);
-        const fallbackElements = document.querySelectorAll(`[data-face-fallback="${face}"]`);
-        const resetButton = resetFaceButtons.find((button) => button.dataset.resetFace === face);
-
-        photoElements.forEach((element) => {
-          element.hidden = true;
-          element.removeAttribute("src");
-        });
-        if (oldUrl) {
-          URL.revokeObjectURL(oldUrl);
-          faceImageUrls.delete(face);
-        }
-        faceImageVersionIds.delete(face);
-
-        if (image instanceof Blob && image.size > 0) {
-          // One object URL can feed both the child button and setup preview.
-          // It points at the local Blob; it does not make a network request.
-          const url = URL.createObjectURL(image);
-          faceImageUrls.set(face, url);
-          if (versionId !== null && versionId !== undefined) {
-            faceImageVersionIds.set(face, versionId);
-          }
-          photoElements.forEach((element) => {
-            element.src = url;
-            element.hidden = false;
-          });
-          fallbackElements.forEach((element) => {
-            element.hidden = true;
-          });
-          if (resetButton) resetButton.disabled = false;
-          return;
-        }
-
-        fallbackElements.forEach((element) => {
-          element.hidden = false;
-        });
-        if (resetButton) resetButton.disabled = true;
-      }
-
-      async function loadSavedFaceImages() {
-        const records = await getFaceImages();
-        records.forEach((record) => {
-          if (FACE_LABELS[record.face] && record.image instanceof Blob) {
-            displayFaceImage(record.face, record.image, record.versionId);
-          }
-        });
-      }
-
-      async function prepareFaceImage(file) {
-        // Some iOS camera and Photos picker results omit the MIME type. Let the
-        // browser attempt to decode those files instead of rejecting them early.
-        if (file.type && !file.type.startsWith("image/")) {
-          throw new Error("The selected file is not an image");
-        }
-
-        const sourceUrl = URL.createObjectURL(file);
-        try {
-          const sourceImage = new Image();
-          sourceImage.decoding = "async";
-          await finishWithin(
-            new Promise((resolve, reject) => {
-              sourceImage.onload = resolve;
-              sourceImage.onerror = () => reject(new Error("The selected image could not be opened"));
-              sourceImage.src = sourceUrl;
-            }),
-            "Opening the selected photo",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-
-          if (!sourceImage.naturalWidth || !sourceImage.naturalHeight) {
-            throw new Error("The selected image has no usable dimensions");
-          }
-
-          // Center-cropping keeps all three buttons consistent. Resizing to at
-          // most 720px avoids filling Safari's storage with full camera photos.
-          // Re-encoding also strips camera metadata such as GPS coordinates.
-          const sourceSide = Math.min(sourceImage.naturalWidth, sourceImage.naturalHeight);
-          const outputSize = Math.min(720, sourceSide);
-          const sourceX = (sourceImage.naturalWidth - sourceSide) / 2;
-          const sourceY = (sourceImage.naturalHeight - sourceSide) / 2;
-          const canvas = document.createElement("canvas");
-          canvas.width = outputSize;
-          canvas.height = outputSize;
-          const context = canvas.getContext("2d");
-          if (!context) throw new Error("Image resizing is unavailable");
-
-          context.fillStyle = "#fff8ed";
-          context.fillRect(0, 0, outputSize, outputSize);
-          context.drawImage(
-            sourceImage,
-            sourceX,
-            sourceY,
-            sourceSide,
-            sourceSide,
-            0,
-            0,
-            outputSize,
-            outputSize
-          );
-
-          return await finishWithin(
-            new Promise((resolve, reject) => {
-              canvas.toBlob((blob) => {
-                if (blob) resolve(blob);
-                else reject(new Error("The resized image could not be created"));
-              }, "image/jpeg", 0.86);
-            }),
-            "Preparing the selected photo",
-            PHOTO_STORAGE_TIMEOUT_MS
-          );
-        } finally {
-          URL.revokeObjectURL(sourceUrl);
-        }
-      }
-
-      async function handleFaceImageChange(event) {
-        const input = event.currentTarget;
-        const face = input.dataset.faceImageInput;
-        const file = input.files && input.files[0];
-        input.value = "";
-        if (!file || !FACE_LABELS[face]) return;
-
-        input.disabled = true;
-        faceSetupStatus.textContent = `Preparing ${FACE_LABELS[face].toLowerCase()} photo…`;
-
-        try {
-          await faceImagesReady;
-          const image = await prepareFaceImage(file);
-          faceSetupStatus.textContent = `Saving ${FACE_LABELS[face].toLowerCase()} photo…`;
-          const versionId = await saveFaceImage(face, image);
-          if (versionId === null) {
-            faceSetupStatus.textContent = faceImageSaveMessage(lastFaceImageSaveError);
-            return;
-          }
-
-          displayFaceImage(face, image, versionId);
-          faceSetupStatus.textContent = `${FACE_LABELS[face]} photo saved on this device.`;
-        } catch (error) {
-          logError("The selected face photo could not be prepared.", error);
-          faceSetupStatus.textContent = "That photo couldn’t be used. Please try another.";
-        } finally {
-          input.disabled = false;
-        }
-      }
-
-      async function handleResetFace(event) {
-        const button = event.currentTarget;
-        const face = button.dataset.resetFace;
-        if (!FACE_LABELS[face]) return;
-
-        button.disabled = true;
-        faceSetupStatus.textContent = `Restoring the ${FACE_LABELS[face].toLowerCase()} emoji…`;
-        await faceImagesReady;
-        const wasRemoved = await removeFaceImage(face);
-
-        if (wasRemoved) {
-          displayFaceImage(face, null);
-          faceSetupStatus.textContent = `${FACE_LABELS[face]} now uses the emoji.`;
-        } else {
-          button.disabled = false;
-          faceSetupStatus.textContent = "That photo couldn’t be reset. Please try again.";
-        }
-      }
-
-      function primeSpeechForSadPrompt() {
-        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-          return false;
-        }
-
-        try {
-          const speech = window.speechSynthesis;
-          speech.cancel();
-          speech.resume();
-
-          // iOS Safari may reject speech first requested after an await because
-          // the original tap's temporary user activation has expired. Speaking
-          // an inaudible utterance synchronously inside the tap handler primes
-          // the engine. The real words are still spoken only after the sad
-          // check-in's IndexedDB save attempt has finished.
-          const primer = new SpeechSynthesisUtterance("ready");
-          primer.volume = 0;
-          primer.rate = 2;
-          speech.speak(primer);
-          return true;
-        } catch (error) {
-          logError("Speech synthesis could not be prepared.", error);
-          return false;
-        }
-      }
-
-      function speakSadPrompt(speechWasPrimed) {
-        if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-          return;
-        }
-
-        try {
-          const speech = window.speechSynthesis;
-          const prompt = new SpeechSynthesisUtterance("Tell us why you're sad");
-          prompt.rate = 0.92;
-          prompt.pitch = 1.04;
-
-          // Cancel any unfinished silent primer. resume() also clears an iOS
-          // Safari state where speech can remain paused after an interruption.
-          if (speechWasPrimed) speech.cancel();
-          speech.resume();
-          speech.speak(prompt);
-        } catch (error) {
-          // The text remains visible, which is the required fallback.
-          logError("The sad prompt could not be spoken.", error);
-        }
-      }
-
-      function cancelSpeech() {
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
         }
       }
 
@@ -1297,17 +681,13 @@
       }
 
       function resetRecordingControls() {
-        voiceChoiceLocked = false;
-        recordButton.disabled = false;
-        recordButton.setAttribute("aria-label", "Record a voice clip");
-        recordButtonText.textContent = "Record";
-        noThanksButton.disabled = false;
+        voiceStepFinished = false;
+        allDoneButton.disabled = false;
         listeningIndicator.classList.remove("is-visible");
       }
 
       function showFaceScreen() {
         window.clearTimeout(resetTimer);
-        cancelSpeech();
         currentSadCheckInId = null;
         faceTapLocked = false;
         tapResponse.textContent = "";
@@ -1320,13 +700,14 @@
         showOnly(checkinPanel);
       }
 
-      function showVoiceChoices() {
+      function showSadScreenAndListen() {
         resetRecordingControls();
+        voiceSessionNumber += 1;
         showOnly(voicePanel);
+        void startRecording(voiceSessionNumber);
       }
 
       function showThanksThenReset() {
-        cancelSpeech();
         showOnly(thanksPanel);
         window.clearTimeout(resetTimer);
         resetTimer = window.setTimeout(showFaceScreen, THANK_YOU_DURATION_MS);
@@ -1345,21 +726,14 @@
         // child always receives an immediate response to the tap.
         showImmediateResponse(selectedButton);
 
-        // Prime speech during the original sad tap. The real prompt is delayed
-        // until after the save attempt below, preserving the required ordering.
-        const speechWasPrimed = face === "sad" ? primeSpeechForSadPrompt() : false;
-
-        // Loading is normally complete before a tap. Awaiting it here handles a
-        // very fast first tap while keeping the visual response above instant.
-        // The saved version id freezes the exact photo used for this check-in.
-        await faceImagesReady;
-        const faceImageVersionId = faceImageVersionIds.get(face) || null;
-        const checkInId = await saveCheckIn(face, timestamp, faceImageVersionId);
+        const checkInId = await saveCheckIn(face, timestamp);
 
         if (face === "sad") {
           currentSadCheckInId = checkInId;
-          showVoiceChoices();
-          speakSadPrompt(speechWasPrimed);
+          // The check-in is already saved (or the save quietly failed) before
+          // the microphone turns on, so his answer never depends on the
+          // recording.
+          showSadScreenAndListen();
           return;
         }
 
@@ -1368,34 +742,64 @@
         showFaceScreen();
       }
 
-      function preferredAudioType() {
-        // Safari on iOS normally selects MP4. Other candidates keep local
-        // desktop testing useful without assuming every browser records WebM.
-        const candidates = [
-          "audio/mp4",
-          "audio/mp4;codecs=mp4a.40.2",
-          "audio/webm;codecs=opus",
-          "audio/webm",
-          "audio/ogg;codecs=opus"
-        ];
+      function preferredClipType(isVideo) {
+        // Safari on iOS normally selects MP4 for both video and audio. The
+        // WebM/Ogg candidates keep desktop testing useful.
+        const candidates = isVideo
+          ? [
+              "video/mp4",
+              "video/mp4;codecs=avc1,mp4a.40.2",
+              "video/webm;codecs=vp8,opus",
+              "video/webm"
+            ]
+          : [
+              "audio/mp4",
+              "audio/mp4;codecs=mp4a.40.2",
+              "audio/webm;codecs=opus",
+              "audio/webm",
+              "audio/ogg;codecs=opus"
+            ];
 
         return candidates.find((type) => window.MediaRecorder.isTypeSupported(type)) || "";
       }
 
-      function releaseMicrophone(stream) {
+      async function getCameraAndMic() {
+        // Ask for the front ("user") camera at a small size plus the mic.
+        // "ideal" means "close to this if you can", so the request never
+        // fails just because the camera can't do exactly 640x480.
+        try {
+          return await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: "user",
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            },
+            audio: true
+          });
+        } catch (error) {
+          // Camera denied or missing: still capture his voice rather than
+          // losing the clip entirely.
+          logError("The camera could not start; recording audio only.", error);
+          return navigator.mediaDevices.getUserMedia({ audio: true });
+        }
+      }
+
+      function releaseCameraAndMic(stream) {
         if (!stream) return;
         stream.getTracks().forEach((track) => track.stop());
       }
 
-      function createRecorder(stream, audioType) {
-        if (!audioType) return new MediaRecorder(stream);
+      function createRecorder(stream, clipType, isVideo) {
+        const options = { audioBitsPerSecond: AUDIO_BITS_PER_SECOND };
+        if (isVideo) options.videoBitsPerSecond = VIDEO_BITS_PER_SECOND;
+        if (clipType) options.mimeType = clipType;
 
         try {
-          return new MediaRecorder(stream, { mimeType: audioType });
+          return new MediaRecorder(stream, options);
         } catch (error) {
           // A browser can occasionally claim support but reject the explicit
-          // option. Its default is safer than losing the recording completely.
-          logError("The preferred audio type could not be used; using the browser default.", error);
+          // options. Its default is safer than losing the recording completely.
+          logError("The preferred recording options could not be used; using the browser default.", error);
           return new MediaRecorder(stream);
         }
       }
@@ -1403,19 +807,24 @@
       async function completeRecording(session, shouldAttachAudio) {
         if (session.finalized) return;
         session.finalized = true;
+        voiceStepFinished = true;
+        allDoneButton.disabled = true;
         window.clearTimeout(session.stopTimer);
-        releaseMicrophone(session.stream);
+        releaseCameraAndMic(session.stream);
         activeRecording = null;
         listeningIndicator.classList.remove("is-visible");
 
         if (shouldAttachAudio && session.chunks.length > 0) {
-          const audioType = session.recorder.mimeType || session.audioType || session.chunks[0].type || "";
-          const audio = new Blob(session.chunks, audioType ? { type: audioType } : undefined);
+          const clipType = session.recorder.mimeType || session.clipType || session.chunks[0].type || "";
+          const clip = new Blob(session.chunks, clipType ? { type: clipType } : undefined);
 
-          if (audio.size > 0) {
-            await attachAudio(currentSadCheckInId, audio, audioType || null);
+          if (clip.size > 0) {
+            const clipFields = session.isVideo
+              ? { video: clip, videoType: clipType || null }
+              : { audio: clip, audioType: clipType || null };
+            await attachClip(currentSadCheckInId, clipFields);
           } else {
-            logError("The recorded voice clip was empty.", new Error("Empty audio Blob"));
+            logError("The recorded clip was empty.", new Error("Empty clip Blob"));
           }
         } else if (shouldAttachAudio) {
           logError("The recorder returned no audio data.", new Error("No MediaRecorder chunks"));
@@ -1428,8 +837,11 @@
         const session = activeRecording;
         if (!session || session.finalized) return;
 
+        // Lock All done right away. MediaRecorder finishes asynchronously, and
+        // a second stop request before then could cut off the final chunk.
+        voiceStepFinished = true;
+        allDoneButton.disabled = true;
         window.clearTimeout(session.stopTimer);
-        recordButton.disabled = true;
         listeningIndicator.classList.remove("is-visible");
 
         try {
@@ -1437,24 +849,22 @@
             session.recorder.stop();
             // Stop every track immediately after requesting the final chunk so
             // iOS releases the orange microphone indicator without delay.
-            releaseMicrophone(session.stream);
+            releaseCameraAndMic(session.stream);
           } else {
             void completeRecording(session, true);
           }
         } catch (error) {
           logError("Recording could not be stopped normally.", error);
-          releaseMicrophone(session.stream);
+          releaseCameraAndMic(session.stream);
           void completeRecording(session, false);
         }
       }
 
-      async function startRecording() {
-        if (voiceChoiceLocked) return;
-        voiceChoiceLocked = true;
-        recordButton.disabled = true;
-        noThanksButton.disabled = true;
-        cancelSpeech();
+      function isStillThisSadScreen(sessionNumber) {
+        return sessionNumber === voiceSessionNumber && !voiceStepFinished;
+      }
 
+      async function startRecording(sessionNumber) {
         let stream = null;
         try {
           if (!("mediaDevices" in navigator) || !("getUserMedia" in navigator.mediaDevices)) {
@@ -1464,13 +874,27 @@
             throw new Error("MediaRecorder is unavailable");
           }
 
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const audioType = preferredAudioType();
-          const recorder = createRecorder(stream, audioType);
+          // No tap is needed here: iOS Safari asks for camera and microphone
+          // permission per site, not per tap. If both are set to Allow for
+          // this site, they simply turn on (the green dot appears). The
+          // stream is never shown on screen; it goes only to the recorder.
+          stream = await getCameraAndMic();
+
+          // The permission prompt or camera start can take a moment. If he
+          // tapped All done meanwhile, turn everything straight back off.
+          if (!isStillThisSadScreen(sessionNumber)) {
+            releaseCameraAndMic(stream);
+            return;
+          }
+
+          const isVideo = stream.getVideoTracks().length > 0;
+          const clipType = preferredClipType(isVideo);
+          const recorder = createRecorder(stream, clipType, isVideo);
           const session = {
             recorder,
             stream,
-            audioType,
+            clipType,
+            isVideo,
             chunks: [],
             stopTimer: null,
             finalized: false
@@ -1490,39 +914,42 @@
 
           recorder.onerror = (event) => {
             logError("MediaRecorder reported an error.", event.error || event);
-            releaseMicrophone(session.stream);
+            releaseCameraAndMic(session.stream);
             void completeRecording(session, false);
           };
 
           recorder.start();
-          recordButton.disabled = false;
-          recordButton.setAttribute("aria-label", "Stop recording");
-          recordButtonText.textContent = "Stop";
           listeningIndicator.classList.add("is-visible");
 
           // The ten-second limit is intentionally invisible. It limits stored
           // audio without giving the child a countdown or time pressure.
           session.stopTimer = window.setTimeout(requestRecordingStop, RECORDING_LIMIT_MS);
         } catch (error) {
-          releaseMicrophone(stream);
+          releaseCameraAndMic(stream);
           logError("Microphone permission was denied or recording could not start.", error);
-          showThanksThenReset();
+          // Same warm ending as always; his sad check-in is already saved.
+          if (isStillThisSadScreen(sessionNumber)) {
+            voiceStepFinished = true;
+            allDoneButton.disabled = true;
+            showThanksThenReset();
+          }
         }
       }
 
-      function handleRecordButton() {
-        if (activeRecording && activeRecording.recorder.state === "recording") {
+      function handleAllDone() {
+        if (voiceStepFinished) return;
+
+        if (activeRecording) {
+          // Stopping keeps whatever he has said so far. completeRecording
+          // attaches the clip and then shows the thank-you.
           requestRecordingStop();
           return;
         }
-        void startRecording();
-      }
 
-      function handleNoThanks() {
-        if (voiceChoiceLocked) return;
-        voiceChoiceLocked = true;
-        recordButton.disabled = true;
-        noThanksButton.disabled = true;
+        // The mic hadn't started yet (for example, Safari was still asking
+        // for permission). Nothing was recorded, so just say thank you.
+        voiceStepFinished = true;
+        allDoneButton.disabled = true;
         showThanksThenReset();
       }
 
@@ -1533,45 +960,14 @@
         return `${year}-${month}-${day}`;
       }
 
-      function cleanUpAudioPlayers() {
-        audioPlayers.forEach(({ audio, url }) => {
-          audio.pause();
+      function cleanUpMediaPlayers() {
+        // Pausing and revoking each object URL frees the Blob copy the
+        // browser made for playback. Works the same for audio and video.
+        mediaPlayers.forEach(({ media, url }) => {
+          media.pause();
           URL.revokeObjectURL(url);
         });
-        audioPlayers = [];
-      }
-
-      function cleanUpLogFaceImages() {
-        logFaceImageUrls.forEach((url) => URL.revokeObjectURL(url));
-        logFaceImageUrls.clear();
-      }
-
-      function getLogFaceImageUrl(record, versionsById) {
-        const hasSavedPhotoVersion = Object.prototype.hasOwnProperty.call(
-          record,
-          "faceImageVersionId"
-        );
-
-        if (hasSavedPhotoVersion) {
-          // null means the emoji was active at check-in time. If a referenced
-          // Blob is missing, the honest fallback is also the emoji—not a newer
-          // photo that would rewrite history.
-          if (record.faceImageVersionId === null) return null;
-          const version = versionsById.get(record.faceImageVersionId);
-          if (!version || !(version.image instanceof Blob) || version.image.size === 0) {
-            return null;
-          }
-
-          if (!logFaceImageUrls.has(version.id)) {
-            logFaceImageUrls.set(version.id, URL.createObjectURL(version.image));
-          }
-          return logFaceImageUrls.get(version.id);
-        }
-
-        // Records saved before photo versioning contain no historical link.
-        // Continue showing the current photo for those legacy rows because the
-        // exact photo active at their check-in time cannot be reconstructed.
-        return faceImageUrls.get(record.face) || null;
+        mediaPlayers = [];
       }
 
       function makePlayButton(record) {
@@ -1584,8 +980,8 @@
         const url = URL.createObjectURL(record.audio);
         const audio = new Audio(url);
         audio.preload = "metadata";
-        const player = { audio, url, button };
-        audioPlayers.push(player);
+        const player = { media: audio, url, button };
+        mediaPlayers.push(player);
 
         function resetButton() {
           button.textContent = "▶ Play";
@@ -1602,10 +998,10 @@
             return;
           }
 
-          audioPlayers.forEach((otherPlayer) => {
+          mediaPlayers.forEach((otherPlayer) => {
             if (otherPlayer !== player) {
-              otherPlayer.audio.pause();
-              otherPlayer.audio.currentTime = 0;
+              otherPlayer.media.pause();
+              otherPlayer.media.currentTime = 0;
             }
           });
 
@@ -1622,7 +1018,22 @@
         return button;
       }
 
-      function renderRecords(records, faceImageVersions) {
+      function makeVideoPlayer(record) {
+        // A <video> element with built-in controls. playsinline keeps iOS
+        // from jumping to full screen the moment you press play.
+        const url = URL.createObjectURL(record.video);
+        const video = document.createElement("video");
+        video.className = "log-video";
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.src = url;
+        video.setAttribute("aria-label", "Video clip");
+        mediaPlayers.push({ media: video, url });
+        return video;
+      }
+
+      function renderRecords(records) {
         logContent.replaceChildren();
 
         if (records.length === 0) {
@@ -1638,9 +1049,6 @@
           neutral: { symbol: "😐", label: "Neutral" },
           sad: { symbol: "😢", label: "Sad" }
         };
-        const versionsById = new Map(
-          faceImageVersions.map((version) => [version.id, version])
-        );
         const groups = new Map();
 
         records
@@ -1674,20 +1082,13 @@
             const item = document.createElement("li");
             item.className = "log-entry";
 
-            let face;
-            const faceImageUrl = getLogFaceImageUrl(record, versionsById);
-            if (faceImageUrl) {
-              face = document.createElement("img");
-              face.className = "log-face-photo";
-              face.src = faceImageUrl;
-              face.alt = details.label;
-            } else {
-              face = document.createElement("span");
-              face.className = "log-face";
-              face.setAttribute("role", "img");
-              face.setAttribute("aria-label", details.label);
-              face.textContent = details.symbol;
-            }
+            // Every row shows the standard emoji, including check-ins made
+            // back when custom photos existed.
+            const face = document.createElement("span");
+            face.className = "log-face";
+            face.setAttribute("role", "img");
+            face.setAttribute("aria-label", details.label);
+            face.textContent = details.symbol;
 
             const time = document.createElement("time");
             time.className = "log-time";
@@ -1698,7 +1099,9 @@
             }).format(date);
 
             item.append(face, time);
-            if (record.audio instanceof Blob && record.audio.size > 0) {
+            if (record.video instanceof Blob && record.video.size > 0) {
+              item.append(makeVideoPlayer(record));
+            } else if (record.audio instanceof Blob && record.audio.size > 0) {
               item.append(makePlayButton(record));
             }
             list.append(item);
@@ -1711,61 +1114,62 @@
 
       async function renderLog() {
         const token = ++logRenderToken;
-        cleanUpAudioPlayers();
-        cleanUpLogFaceImages();
+        cleanUpMediaPlayers();
 
         const loading = document.createElement("p");
         loading.className = "log-loading";
         loading.textContent = "Loading…";
         logContent.replaceChildren(loading);
 
-        // Face photos, their immutable versions, and check-ins live in separate
-        // stores. Wait for all three before deciding which image belongs in a row.
-        const [records, , faceImageVersions] = await Promise.all([
-          getCheckIns(),
-          faceImagesReady,
-          getFaceImageVersions()
-        ]);
+        const records = await getCheckIns();
         if (token !== logRenderToken || window.location.hash !== "#log") return;
-        renderRecords(records, faceImageVersions);
+        renderRecords(records);
+      }
+
+      async function requestPersistentStorage() {
+        // By default a site's storage is "best effort": when the phone runs
+        // low on space, or Safari decides the site is unused, it may wipe
+        // IndexedDB (and every check-in and clip with it). persist() asks
+        // the browser to treat this site's data as "keep unless the user
+        // clears it". The browser decides on its own and never shows him a
+        // prompt. If it says no, or the API is missing, nothing changes.
+        if (!navigator.storage || !navigator.storage.persist) return;
+
+        try {
+          const granted = await navigator.storage.persist();
+          console.info(`[Feelings Check-in] Persistent storage ${granted ? "granted" : "not granted"}.`);
+        } catch (error) {
+          logError("Persistent storage could not be requested.", error);
+        }
       }
 
       function renderRoute() {
+        // Any hash other than #log (including the old #faces) shows his screen.
         const showLog = window.location.hash === "#log";
-        const showFaceSetup = window.location.hash === "#faces";
-        childView.hidden = showLog || showFaceSetup;
+        childView.hidden = showLog;
         logView.hidden = !showLog;
-        faceSetupView.hidden = !showFaceSetup;
 
         if (showLog) {
-          cancelSpeech();
           void renderLog();
         } else {
           ++logRenderToken;
-          cleanUpAudioPlayers();
-          cleanUpLogFaceImages();
-          if (showFaceSetup) cancelSpeech();
+          cleanUpMediaPlayers();
         }
       }
 
       faceButtons.forEach((button) => button.addEventListener("click", handleFaceTap));
-      faceImageInputs.forEach((input) => input.addEventListener("change", handleFaceImageChange));
-      resetFaceButtons.forEach((button) => button.addEventListener("click", handleResetFace));
-      recordButton.addEventListener("click", handleRecordButton);
-      noThanksButton.addEventListener("click", handleNoThanks);
+      allDoneButton.addEventListener("click", handleAllDone);
       window.addEventListener("hashchange", renderRoute);
       window.addEventListener("pagehide", () => {
-        cancelSpeech();
-        cleanUpAudioPlayers();
-        cleanUpLogFaceImages();
+        cleanUpMediaPlayers();
         if (activeRecording) {
-          releaseMicrophone(activeRecording.stream);
+          releaseCameraAndMic(activeRecording.stream);
         }
       });
 
       showFaceScreen();
-      faceImagesReady = loadSavedFaceImages();
       renderRoute();
+      void requestPersistentStorage();
     })();
   </script>
 </body>
